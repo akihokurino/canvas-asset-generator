@@ -24,7 +24,7 @@ exports.queuingVideoSplitTask = functions
     const tasksClient = new CloudTasksClient();
     const queuePath = tasksClient.queuePath(projectId, location, queue);
 
-    const url = "https://google.com/";
+    const url = "https://canvas-329810.an.r.appspot.com/video_split";
     const delaySeconds = 1;
 
     const payload = {
