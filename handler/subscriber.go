@@ -34,7 +34,7 @@ func NewSubscriber(splitVideo usecase.SplitVideo) Subscriber {
 
 		if err := splitVideo(ctx, payload.Path); err != nil {
 			log.Printf("SplitVideo: %v", err)
-			http.Error(w, "Internal Error", http.StatusInternalServerError)
+			http.Error(w, "Internal Error, cannot split video", http.StatusInternalServerError)
 			return
 		}
 
