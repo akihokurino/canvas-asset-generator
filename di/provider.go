@@ -3,20 +3,28 @@
 package di
 
 import (
-	"canvas-server/handlers"
+	"canvas-server/handler"
+	"canvas-server/infra/cloud_storage"
+	"canvas-server/usecase"
 
 	"github.com/google/wire"
 )
 
 var providerSet = wire.NewSet(
-	handlers.NewSubscriber,
-	handlers.NewAPI,
+	provideGCSClient,
+	usecase.NewSplitVideo,
+	handler.NewSubscriber,
+	handler.NewAPI,
 )
 
-func ResolveSubscriber() handlers.Subscriber {
+func provideGCSClient() cloud_storage.Client {
+	return cloud_storage.NewClient("canvas-329810.appspot.com")
+}
+
+func ResolveSubscriber() handler.Subscriber {
 	panic(wire.Build(providerSet))
 }
 
-func ResolveAPI() handlers.API {
+func ResolveAPI() handler.API {
 	panic(wire.Build(providerSet))
 }
