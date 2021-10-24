@@ -20,6 +20,9 @@ func NewSplitVideo(gcsClient cloud_storage.Client, ffmpegClient ffmpeg.Client) S
 		videoName := strings.Replace(path, "Video/", "", -1)
 		videoName = strings.Replace(videoName, ".mp4", "", -1)
 
+		log.Printf("video path = %s", path)
+		log.Printf("video name = %s", videoName)
+
 		buf, err := gcsClient.Download(ctx, path)
 		if err != nil {
 			return errors.WithStack(err)
@@ -49,7 +52,7 @@ func NewSplitVideo(gcsClient cloud_storage.Client, ffmpegClient ffmpeg.Client) S
 		}
 
 		for _, current := range currents {
-			log.Printf("deleted path = %s", current)
+			log.Printf("deleted thumbnail path = %s", current)
 			if err := gcsClient.Delete(ctx, current); err != nil {
 				return errors.WithStack(err)
 			}
@@ -66,7 +69,7 @@ func NewSplitVideo(gcsClient cloud_storage.Client, ffmpegClient ffmpeg.Client) S
 				return errors.WithStack(err)
 			}
 
-			log.Printf("url %s", u.String())
+			log.Printf("thumbnail url %s", u.String())
 		}
 
 		return nil
