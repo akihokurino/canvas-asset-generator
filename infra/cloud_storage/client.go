@@ -3,6 +3,8 @@ package cloud_storage
 import (
 	"bytes"
 	"context"
+	"fmt"
+	"net/url"
 
 	"github.com/pkg/errors"
 
@@ -11,6 +13,7 @@ import (
 
 type Client interface {
 	Download(ctx context.Context, path string) (*bytes.Buffer, error)
+	Save(ctx context.Context, path string, data []byte) (*url.URL, error)
 }
 
 type client struct {
@@ -46,4 +49,29 @@ func (c *client) Download(ctx context.Context, path string) (*bytes.Buffer, erro
 	}
 
 	return &buf, nil
+}
+
+func (c *client) Save(ctx context.Context, path string, data []byte) (*url.URL, error) {
+	s, err := storage.NewClient(ctx)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	writer := s.Bucket(c.bucketName).Object(path).NewWriter(ctx)
+	defer func() {
+		_ = writer.Close()
+	}()
+
+	writer.ContentType = "image/jpeg"
+
+	if _, err := writer.Write(data); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	u, err := url.Parse(fmt.Sprintf("gs://%s/%s", c.bucketName, path))
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return u, err
 }

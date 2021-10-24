@@ -5,6 +5,7 @@ package di
 import (
 	"canvas-server/handler"
 	"canvas-server/infra/cloud_storage"
+	"canvas-server/infra/ffmpeg"
 	"canvas-server/usecase"
 
 	"github.com/google/wire"
@@ -12,6 +13,7 @@ import (
 
 var providerSet = wire.NewSet(
 	provideGCSClient,
+	ffmpeg.NewClient,
 	usecase.NewSplitVideo,
 	handler.NewSubscriber,
 	handler.NewAPI,
