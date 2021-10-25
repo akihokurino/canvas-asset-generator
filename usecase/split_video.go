@@ -4,6 +4,9 @@ import (
 	"bufio"
 	"bytes"
 	"canvas-server/infra/cloud_storage"
+	"canvas-server/infra/datastore"
+	"canvas-server/infra/datastore/thumbnail"
+	"canvas-server/infra/datastore/work"
 	"canvas-server/infra/ffmpeg"
 	"context"
 	"fmt"
@@ -12,6 +15,10 @@ import (
 	"io/ioutil"
 	"log"
 	"strings"
+	"time"
+
+	"go.mercari.io/datastore/boom"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/pkg/errors"
 )
@@ -22,8 +29,14 @@ type SubImager interface {
 
 type SplitVideo func(ctx context.Context, path string) error
 
-func NewSplitVideo(gcsClient cloud_storage.Client, ffmpegClient ffmpeg.Client) SplitVideo {
+func NewSplitVideo(
+	gcsClient cloud_storage.Client,
+	ffmpegClient ffmpeg.Client,
+	tx datastore.Transaction,
+	workRepo work.Repository,
+	thumbnailRepo thumbnail.Repository) SplitVideo {
 	return func(ctx context.Context, path string) error {
+		now := time.Now()
 		videoName := strings.Replace(path, "Video/", "", -1)
 		videoName = strings.Replace(videoName, ".mp4", "", -1)
 
@@ -65,13 +78,16 @@ func NewSplitVideo(gcsClient cloud_storage.Client, ffmpegClient ffmpeg.Client) S
 			}
 		}
 
+		workEntity := work.NewEntity(videoName, gcsClient.FullPath(path), now)
+		thumbnailEntities := make([]*thumbnail.Entity, 0)
+
 		for i := 0; i < durationSecond; i++ {
-			thumbnail, err := ffmpegClient.Video2Thumbnail(tmpPath, i)
+			data, err := ffmpegClient.Video2Thumbnail(tmpPath, i)
 			if err != nil {
 				return errors.WithStack(err)
 			}
 
-			imgSource, _, err := image.Decode(thumbnail)
+			imgSource, _, err := image.Decode(data)
 			if err != nil {
 				return errors.WithStack(err)
 			}
@@ -91,6 +107,42 @@ func NewSplitVideo(gcsClient cloud_storage.Client, ffmpegClient ffmpeg.Client) S
 			}
 
 			log.Printf("thumbnail url %s", u.String())
+			thumbnailEntities = append(thumbnailEntities, thumbnail.NewEntity(workEntity.ID, u.String(), i, now))
+		}
+
+		currentThumbnailEntities, err := thumbnailRepo.GetAllByWork(ctx, workEntity.ID)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+
+		eg := errgroup.Group{}
+
+		for i := range currentThumbnailEntities {
+			e := currentThumbnailEntities[i]
+			eg.Go(func() error {
+				return tx(ctx, func(tx *boom.Transaction) error {
+					return thumbnailRepo.Delete(tx, e.ID)
+				})
+			})
+		}
+
+		eg.Go(func() error {
+			return tx(ctx, func(tx *boom.Transaction) error {
+				return workRepo.Put(tx, workEntity)
+			})
+		})
+
+		for i := range thumbnailEntities {
+			e := thumbnailEntities[i]
+			eg.Go(func() error {
+				return tx(ctx, func(tx *boom.Transaction) error {
+					return thumbnailRepo.Put(tx, e)
+				})
+			})
+		}
+
+		if err := eg.Wait(); err != nil {
+			return errors.WithStack(err)
 		}
 
 		return nil

@@ -18,6 +18,7 @@ type Client interface {
 	Download(ctx context.Context, path string) (*bytes.Buffer, error)
 	Save(ctx context.Context, path string, data []byte) (*url.URL, error)
 	Delete(ctx context.Context, path string) error
+	FullPath(path string) string
 }
 
 type client struct {
@@ -120,4 +121,8 @@ func (c *client) Delete(ctx context.Context, path string) error {
 	}
 
 	return nil
+}
+
+func (c *client) FullPath(path string) string {
+	return fmt.Sprintf("gs://%s/%s", c.bucketName, path)
 }
