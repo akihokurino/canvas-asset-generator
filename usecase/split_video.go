@@ -2,16 +2,23 @@ package usecase
 
 import (
 	"bufio"
+	"bytes"
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/ffmpeg"
 	"context"
 	"fmt"
+	"image"
+	"image/jpeg"
 	"io/ioutil"
 	"log"
 	"strings"
 
 	"github.com/pkg/errors"
 )
+
+type SubImager interface {
+	SubImage(r image.Rectangle) image.Image
+}
 
 type SplitVideo func(ctx context.Context, path string) error
 
@@ -64,7 +71,21 @@ func NewSplitVideo(gcsClient cloud_storage.Client, ffmpegClient ffmpeg.Client) S
 				return errors.WithStack(err)
 			}
 
-			u, err := gcsClient.Save(ctx, fmt.Sprintf("Thumbnail/%s/%d", videoName, i), thumbnail.Bytes())
+			imgSource, _, err := image.Decode(thumbnail)
+			if err != nil {
+				return errors.WithStack(err)
+			}
+
+			subImage := imgSource.(SubImager).SubImage(
+				image.Rect(0, 250, imgSource.Bounds().Dx(), imgSource.Bounds().Dy()),
+			)
+
+			buf := bytes.NewBuffer(nil)
+			if err := jpeg.Encode(buf, subImage, &jpeg.Options{Quality: 100}); err != nil {
+				return errors.WithStack(err)
+			}
+
+			u, err := gcsClient.Save(ctx, fmt.Sprintf("Thumbnail/%s/%d", videoName, i), buf.Bytes())
 			if err != nil {
 				return errors.WithStack(err)
 			}
