@@ -32,16 +32,16 @@ func NewClient(bucketName string) Client {
 }
 
 func (c *client) List(ctx context.Context, path string) ([]string, error) {
-	sc, err := storage.NewClient(ctx)
+	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	defer func() {
-		_ = sc.Close()
+		_ = cli.Close()
 	}()
 
 	results := make([]string, 0)
-	it := sc.Bucket(c.bucketName).Objects(ctx, &storage.Query{Prefix: path})
+	it := cli.Bucket(c.bucketName).Objects(ctx, &storage.Query{Prefix: path})
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
@@ -58,15 +58,15 @@ func (c *client) List(ctx context.Context, path string) ([]string, error) {
 }
 
 func (c *client) Download(ctx context.Context, path string) (*bytes.Buffer, error) {
-	sc, err := storage.NewClient(ctx)
+	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 	defer func() {
-		_ = sc.Close()
+		_ = cli.Close()
 	}()
 
-	reader, err := sc.Bucket(c.bucketName).Object(path).NewReader(ctx)
+	reader, err := cli.Bucket(c.bucketName).Object(path).NewReader(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -83,12 +83,12 @@ func (c *client) Download(ctx context.Context, path string) (*bytes.Buffer, erro
 }
 
 func (c *client) Save(ctx context.Context, path string, data []byte) (*url.URL, error) {
-	s, err := storage.NewClient(ctx)
+	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	writer := s.Bucket(c.bucketName).Object(path).NewWriter(ctx)
+	writer := cli.Bucket(c.bucketName).Object(path).NewWriter(ctx)
 	defer func() {
 		_ = writer.Close()
 	}()
@@ -99,7 +99,7 @@ func (c *client) Save(ctx context.Context, path string, data []byte) (*url.URL, 
 		return nil, errors.WithStack(err)
 	}
 
-	u, err := url.Parse(fmt.Sprintf("gs://%s/%s", c.bucketName, path))
+	u, err := url.Parse(fmt.Sprintf("gs://%cli/%cli", c.bucketName, path))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -108,15 +108,15 @@ func (c *client) Save(ctx context.Context, path string, data []byte) (*url.URL, 
 }
 
 func (c *client) Delete(ctx context.Context, path string) error {
-	sc, err := storage.NewClient(ctx)
+	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return errors.WithStack(err)
 	}
 	defer func() {
-		_ = sc.Close()
+		_ = cli.Close()
 	}()
 
-	if err := sc.Bucket(c.bucketName).Object(path).Delete(ctx); err != nil {
+	if err := cli.Bucket(c.bucketName).Object(path).Delete(ctx); err != nil {
 		return errors.WithStack(err)
 	}
 

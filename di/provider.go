@@ -9,6 +9,7 @@ import (
 	"canvas-server/infra/datastore/thumbnail"
 	"canvas-server/infra/datastore/work"
 	"canvas-server/infra/ffmpeg"
+	"canvas-server/infra/firebase"
 	"canvas-server/subscriber"
 	"canvas-server/usecase"
 
@@ -16,6 +17,7 @@ import (
 )
 
 var providerSet = wire.NewSet(
+	firebase.NewClient,
 	provideGCSClient,
 	provideDSFactory,
 	datastore.NewTransaction,
@@ -26,6 +28,9 @@ var providerSet = wire.NewSet(
 	subscriber.NewSubscriber,
 	graph.NewResolver,
 	graph.NewServer,
+	graph.NewContextProvider,
+	graph.NewAuthenticate,
+	graph.NewCROS,
 )
 
 func provideGCSClient() cloud_storage.Client {

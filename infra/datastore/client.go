@@ -17,12 +17,12 @@ type DSFactory func(ctx context.Context) w.Client
 
 func NewDSFactory(projectID string) DSFactory {
 	return func(ctx context.Context) w.Client {
-		dc, err := datastore.NewClient(ctx, projectID)
+		cli, err := datastore.NewClient(ctx, projectID)
 		if err != nil {
 			panic(err)
 		}
 
-		client, err := clouddatastore.FromClient(ctx, dc)
+		client, err := clouddatastore.FromClient(ctx, cli)
 		if err != nil {
 			panic(err)
 		}

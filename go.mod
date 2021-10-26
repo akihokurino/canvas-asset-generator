@@ -4,7 +4,9 @@ go 1.15
 
 require (
 	cloud.google.com/go/datastore v1.5.0
+	cloud.google.com/go/firestore v1.6.0 // indirect
 	cloud.google.com/go/storage v1.18.2
+	firebase.google.com/go v3.13.0+incompatible
 	github.com/99designs/gqlgen v0.14.0
 	github.com/google/uuid v1.3.0
 	github.com/google/wire v0.5.0
