@@ -6,6 +6,7 @@ package graph
 import (
 	"canvas-server/graph/generated"
 	"canvas-server/graph/model"
+	"canvas-server/infra/datastore"
 	"context"
 )
 
@@ -13,14 +14,22 @@ func (r *mutationResolver) RegisterFCMToken(ctx context.Context, input model.Reg
 	return true, nil
 }
 
-func (r *queryResolver) Thumbnails(ctx context.Context) ([]*model.Thumbnail, error) {
-	return []*model.Thumbnail{
-		{
-			ID:        "1",
-			WorkID:    "1",
-			ImagePath: "test",
-		},
-	}, nil
+func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) ([]*model.Thumbnail, error) {
+	thumbnails, err := r.thumbnailRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
+	if err != nil {
+		return nil, err
+	}
+
+	resItems := make([]*model.Thumbnail, 0, len(thumbnails))
+	for _, t := range thumbnails {
+		resItems = append(resItems, &model.Thumbnail{
+			ID:        t.ID,
+			WorkID:    t.WorkID,
+			ImagePath: t.ImagePath,
+		})
+	}
+
+	return resItems, nil
 }
 
 // Mutation returns generated.MutationResolver implementation.

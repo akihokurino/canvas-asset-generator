@@ -10,9 +10,9 @@ import (
 
 type Server func(mux *http.ServeMux)
 
-func NewServer() Server {
+func NewServer(resolver *Resolver) Server {
 	return func(mux *http.ServeMux) {
-		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &Resolver{}}))
+		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 		http.Handle("/query", srv)

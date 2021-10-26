@@ -1,0 +1,7 @@
+indexes:
+
+- kind: Thumbnail
+  properties:
+  - name: WorkID
+  - name: Order
+    direction: asc

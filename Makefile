@@ -15,5 +15,8 @@ run-local:
 deploy-gae:
 	gcloud app deploy --quiet --version 1 --project canvas-329810 app.yaml
 
+deploy-index:
+	gcloud app deploy --quiet index.yaml
+
 deploy-functions:
 	firebase deploy --only functions

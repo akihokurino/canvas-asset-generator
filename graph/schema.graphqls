@@ -3,7 +3,7 @@
 # https://gqlgen.com/getting-started/
 
 type Query {
-    thumbnails: [Thumbnail!]!
+    thumbnails(page: Int!, limit: Int!): [Thumbnail!]!
 }
 
 type Thumbnail {

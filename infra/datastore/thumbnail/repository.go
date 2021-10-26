@@ -9,6 +9,7 @@ import (
 )
 
 type Repository interface {
+	GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, error)
 	GetAllByWork(ctx context.Context, workID string) ([]*Entity, error)
 	Put(tx *boom.Transaction, item *Entity) error
 	Delete(tx *boom.Transaction, id string) error
@@ -22,6 +23,18 @@ func NewRepository(df datastore.DSFactory) Repository {
 
 type repository struct {
 	df datastore.DSFactory
+}
+
+func (r *repository) GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, error) {
+	b := boom.FromClient(ctx, r.df(ctx))
+	q := b.Client.NewQuery(kind).Offset(pager.Offset()).Limit(pager.Limit())
+
+	var entities []*Entity
+	if _, err := b.GetAll(q, &entities); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return entities, nil
 }
 
 func (r *repository) GetAllByWork(ctx context.Context, workID string) ([]*Entity, error) {

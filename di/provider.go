@@ -24,6 +24,7 @@ var providerSet = wire.NewSet(
 	ffmpeg.NewClient,
 	usecase.NewSplitVideo,
 	subscriber.NewSubscriber,
+	graph.NewResolver,
 	graph.NewServer,
 )
 
