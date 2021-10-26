@@ -12,7 +12,7 @@ func main() {
 	mux := http.DefaultServeMux
 
 	di.ResolveSubscriber()(mux)
-	di.ResolveAPI()(mux)
+	di.ResolveGraphQL()(mux)
 
 	port := os.Getenv("PORT")
 	if port == "" {

@@ -1,0 +1,22 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+type Query {
+    thumbnails: [Thumbnail!]!
+}
+
+type Thumbnail {
+    id: ID!
+    workId: ID!
+    imagePath: String!
+}
+
+type Mutation {
+  registerFCMToken(input: RegisterFCMToken!): Boolean!
+}
+
+input RegisterFCMToken {
+    token: String!
+    device: String!
+}
