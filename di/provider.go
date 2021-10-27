@@ -6,6 +6,7 @@ import (
 	"canvas-server/graph"
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
+	"canvas-server/infra/datastore/fcm_token"
 	"canvas-server/infra/datastore/thumbnail"
 	"canvas-server/infra/datastore/work"
 	"canvas-server/infra/ffmpeg"
@@ -23,6 +24,7 @@ var providerSet = wire.NewSet(
 	datastore.NewTransaction,
 	work.NewRepository,
 	thumbnail.NewRepository,
+	fcm_token.NewRepository,
 	ffmpeg.NewClient,
 	usecase.NewSplitVideo,
 	subscriber.NewSubscriber,

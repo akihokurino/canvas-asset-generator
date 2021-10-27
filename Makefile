@@ -9,6 +9,9 @@ gen:
 	cp di/wire_gen.default.go di/wire_gen.go
 	go generate di/wire_gen.go
 
+build:
+	GOOS=linux GOARCH=amd64 go build -o .tmp/main ./entrypoint/
+
 run-local:
 	go run entrypoint/main.go
 

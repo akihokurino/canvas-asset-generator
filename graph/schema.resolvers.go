@@ -7,10 +7,27 @@ import (
 	"canvas-server/graph/generated"
 	"canvas-server/graph/model"
 	"canvas-server/infra/datastore"
+	"canvas-server/infra/datastore/fcm_token"
 	"context"
+
+	"go.mercari.io/datastore/boom"
 )
 
 func (r *mutationResolver) RegisterFCMToken(ctx context.Context, input model.RegisterFCMToken) (bool, error) {
+	uid := r.contextProvider.MustAuthUID(ctx)
+
+	if err := r.transaction(ctx, func(tx *boom.Transaction) error {
+		tokenEntity := fcm_token.NewEntity(uid.String(), input.Device, input.Token)
+
+		if err := r.fcmTokenRepo.Put(tx, tokenEntity); err != nil {
+			return err
+		}
+
+		return nil
+	}); err != nil {
+		return false, err
+	}
+
 	return true, nil
 }
 

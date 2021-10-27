@@ -48,7 +48,7 @@ func (c *client) List(ctx context.Context, path string) ([]string, error) {
 			break
 		}
 		if err != nil {
-			return nil, err
+			return nil, errors.WithStack(err)
 		}
 
 		results = append(results, attrs.Name)
