@@ -9,6 +9,7 @@ import (
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
 	"context"
+	"fmt"
 
 	"go.mercari.io/datastore/boom"
 )
@@ -49,11 +50,35 @@ func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) ([]
 	return resItems, nil
 }
 
+func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*model.Work, error) {
+	workEntity, err := r.workLoader.Load(ctx, obj.WorkID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.Work{
+		ID:        workEntity.ID,
+		VideoPath: workEntity.VideoPath,
+	}, nil
+}
+
+func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work) ([]*model.Thumbnail, error) {
+	panic(fmt.Errorf("not implemented"))
+}
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
+// Thumbnail returns generated.ThumbnailResolver implementation.
+func (r *Resolver) Thumbnail() generated.ThumbnailResolver { return &thumbnailResolver{r} }
+
+// Work returns generated.WorkResolver implementation.
+func (r *Resolver) Work() generated.WorkResolver { return &workResolver{r} }
+
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+type thumbnailResolver struct{ *Resolver }
+type workResolver struct{ *Resolver }

@@ -6,10 +6,17 @@ type Query {
     thumbnails(page: Int!, limit: Int!): [Thumbnail!]!
 }
 
+type Work {
+    id: ID!
+    videoPath: String!
+    thumbnails: [Thumbnail!]!
+}
+
 type Thumbnail {
     id: ID!
     workId: ID!
     imagePath: String!
+    work: Work!
 }
 
 type Mutation {
