@@ -21,6 +21,7 @@ type Resolver struct {
 	thumbnailRepo   thumbnail.Repository
 	fcmTokenRepo    fcm_token.Repository
 	workLoader      *dataloader.WorkLoader
+	thumbnailLoader *dataloader.ThumbnailLoader
 }
 
 func NewResolver(
@@ -30,7 +31,8 @@ func NewResolver(
 	workRepo work.Repository,
 	thumbnailRepo thumbnail.Repository,
 	fcmTokenRepo fcm_token.Repository,
-	workLoader *dataloader.WorkLoader) *Resolver {
+	workLoader *dataloader.WorkLoader,
+	thumbnailLoader *dataloader.ThumbnailLoader) *Resolver {
 	return &Resolver{
 		contextProvider: contextProvider,
 		fireClient:      fireClient,
@@ -39,5 +41,6 @@ func NewResolver(
 		thumbnailRepo:   thumbnailRepo,
 		fcmTokenRepo:    fcmTokenRepo,
 		workLoader:      workLoader,
+		thumbnailLoader: thumbnailLoader,
 	}
 }

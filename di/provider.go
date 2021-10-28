@@ -30,6 +30,7 @@ var providerSet = wire.NewSet(
 	usecase.NewSplitVideo,
 	subscriber.NewSubscriber,
 	dataloader.NewWorkLoader,
+	dataloader.NewThumbnailLoader,
 	graph.NewResolver,
 	graph.NewServer,
 	graph.NewContextProvider,

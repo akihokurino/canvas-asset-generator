@@ -3,7 +3,6 @@ package dataloader
 import (
 	"canvas-server/infra/datastore/work"
 	"context"
-	"log"
 
 	"github.com/pkg/errors"
 
@@ -30,8 +29,6 @@ func NewWorkLoader(workRepo work.Repository) *WorkLoader {
 		for _, key := range keys {
 			ids = append(ids, key.String())
 		}
-
-		log.Printf("%+v", ids)
 
 		workEntities, _ := workRepo.GetMulti(ctx, ids)
 

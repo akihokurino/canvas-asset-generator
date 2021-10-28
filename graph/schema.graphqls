@@ -3,7 +3,13 @@
 # https://gqlgen.com/getting-started/
 
 type Query {
+    works(page: Int!, limit: Int!): [Work!]!
+    work(id: ID!): Work!
     thumbnails(page: Int!, limit: Int!): [Thumbnail!]!
+}
+
+type Mutation {
+    registerFCMToken(input: RegisterFCMToken!): Boolean!
 }
 
 type Work {
@@ -17,10 +23,6 @@ type Thumbnail {
     workId: ID!
     imagePath: String!
     work: Work!
-}
-
-type Mutation {
-  registerFCMToken(input: RegisterFCMToken!): Boolean!
 }
 
 input RegisterFCMToken {

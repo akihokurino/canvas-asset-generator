@@ -67,7 +67,7 @@ func (r *repository) GetMulti(ctx context.Context, ids []string) ([]*Entity, err
 
 	b := boom.FromClient(ctx, r.df(ctx))
 
-	if err := b.GetMulti(&entities); err != nil {
+	if err := b.GetMulti(entities); err != nil {
 		multiErr, ok := err.(w.MultiError)
 		if !ok {
 			return nil, errors.WithStack(err)
@@ -75,7 +75,7 @@ func (r *repository) GetMulti(ctx context.Context, ids []string) ([]*Entity, err
 
 		for _, e := range multiErr {
 			if e == w.ErrNoSuchEntity {
-				return nil, errors.WithStack(errors.New("not found"))
+				return nil, errors.WithStack(errors.New("entity not found"))
 			}
 		}
 
