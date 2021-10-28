@@ -3,8 +3,12 @@ package cloud_storage
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
 	"fmt"
+	"log"
 	"net/url"
+	"strings"
+	"time"
 
 	"google.golang.org/api/iterator"
 
@@ -19,15 +23,20 @@ type Client interface {
 	Save(ctx context.Context, path string, data []byte) (*url.URL, error)
 	Delete(ctx context.Context, path string) error
 	FullPath(path string) string
+	Signature(gsURL *url.URL) (*url.URL, error)
 }
 
 type client struct {
-	bucketName string
+	projectID         string
+	bucketName        string
+	encodedPrivateKey string
 }
 
-func NewClient(bucketName string) Client {
+func NewClient(projectID string, bucketName string, encodedPrivateKey string) Client {
 	return &client{
-		bucketName: bucketName,
+		projectID:         projectID,
+		bucketName:        bucketName,
+		encodedPrivateKey: encodedPrivateKey,
 	}
 }
 
@@ -125,4 +134,43 @@ func (c *client) Delete(ctx context.Context, path string) error {
 
 func (c *client) FullPath(path string) string {
 	return fmt.Sprintf("gs://%s/%s", c.bucketName, path)
+}
+
+func (c *client) Signature(gsURL *url.URL) (*url.URL, error) {
+	if gsURL == nil {
+		return nil, nil
+	}
+
+	if gsURL.String() == "" {
+		return nil, nil
+	}
+
+	paths := strings.Split(gsURL.Path, "/")
+	bucketID := gsURL.Host
+	objectID := strings.Join(paths[1:], "/")
+
+	expires := time.Now().Add(time.Hour * 1)
+
+	privateKey, _ := base64.StdEncoding.DecodeString(c.encodedPrivateKey)
+
+	log.Println(c.encodedPrivateKey)
+
+	urlStringWithSignature, err := storage.SignedURL(bucketID, objectID, &storage.SignedURLOptions{
+		GoogleAccessID: fmt.Sprintf("%s@appspot.gserviceaccount.com", c.projectID),
+		PrivateKey:     privateKey,
+		Method:         "GET",
+		Expires:        expires,
+	})
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	log.Println(urlStringWithSignature)
+
+	urlWithSignature, err := gsURL.Parse(urlStringWithSignature)
+	if err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return urlWithSignature, nil
 }

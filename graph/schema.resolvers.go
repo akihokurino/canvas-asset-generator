@@ -9,6 +9,7 @@ import (
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
 	"context"
+	"net/url"
 
 	"go.mercari.io/datastore/boom"
 )
@@ -39,9 +40,11 @@ func (r *queryResolver) Works(ctx context.Context, page int, limit int) ([]*mode
 
 	resItems := make([]*model.Work, 0, len(workEntities))
 	for _, entity := range workEntities {
+		ru, _ := url.Parse(entity.VideoPath)
+		su, _ := r.gcsClient.Signature(ru)
 		resItems = append(resItems, &model.Work{
-			ID:        entity.ID,
-			VideoPath: entity.VideoPath,
+			ID:       entity.ID,
+			VideoUrl: su.String(),
 		})
 	}
 
@@ -54,9 +57,12 @@ func (r *queryResolver) Work(ctx context.Context, id string) (*model.Work, error
 		return nil, err
 	}
 
+	ru, _ := url.Parse(workEntity.VideoPath)
+	su, _ := r.gcsClient.Signature(ru)
+
 	return &model.Work{
-		ID:        workEntity.ID,
-		VideoPath: workEntity.VideoPath,
+		ID:       workEntity.ID,
+		VideoUrl: su.String(),
 	}, nil
 }
 
@@ -68,10 +74,13 @@ func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) ([]
 
 	resItems := make([]*model.Thumbnail, 0, len(thumbnailEntities))
 	for _, entity := range thumbnailEntities {
+		ru, _ := url.Parse(entity.ImagePath)
+		su, _ := r.gcsClient.Signature(ru)
+
 		resItems = append(resItems, &model.Thumbnail{
-			ID:        entity.ID,
-			WorkID:    entity.WorkID,
-			ImagePath: entity.ImagePath,
+			ID:       entity.ID,
+			WorkID:   entity.WorkID,
+			ImageUrl: su.String(),
 		})
 	}
 
@@ -84,9 +93,12 @@ func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*mo
 		return nil, err
 	}
 
+	ru, _ := url.Parse(workEntity.VideoPath)
+	su, _ := r.gcsClient.Signature(ru)
+
 	return &model.Work{
-		ID:        workEntity.ID,
-		VideoPath: workEntity.VideoPath,
+		ID:       workEntity.ID,
+		VideoUrl: su.String(),
 	}, nil
 }
 
@@ -98,10 +110,13 @@ func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work) ([]*mode
 
 	resItems := make([]*model.Thumbnail, 0, len(thumbnailEntities))
 	for _, entity := range thumbnailEntities {
+		ru, _ := url.Parse(entity.ImagePath)
+		su, _ := r.gcsClient.Signature(ru)
+
 		resItems = append(resItems, &model.Thumbnail{
-			ID:        entity.ID,
-			WorkID:    entity.WorkID,
-			ImagePath: entity.ImagePath,
+			ID:       entity.ID,
+			WorkID:   entity.WorkID,
+			ImageUrl: su.String(),
 		})
 	}
 

@@ -20,4 +20,5 @@ require (
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.58.0
 	gopkg.in/vansante/go-ffprobe.v2 v2.0.3
+	gopkg.in/yaml.v2 v2.2.8
 )

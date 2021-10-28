@@ -17,4 +17,5 @@ services:
       - "-c"
       - "go run /app/entrypoint/main.go"
     environment:
+      - IS_LOCAL=true
       - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-cred.json

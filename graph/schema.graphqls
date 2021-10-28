@@ -14,14 +14,14 @@ type Mutation {
 
 type Work {
     id: ID!
-    videoPath: String!
+    videoUrl: String!
     thumbnails: [Thumbnail!]!
 }
 
 type Thumbnail {
     id: ID!
     workId: ID!
-    imagePath: String!
+    imageUrl: String!
     work: Work!
 }
 

@@ -23,3 +23,10 @@ deploy-index:
 
 deploy-functions:
 	firebase deploy --only functions
+
+gen-gcp-credential-pem:
+	openssl pkcs12 -in key.p12 -passin pass:notasecret -out key.pem -nodes
+	cat key.pem | base64
+
+gen-app-yaml:
+	go run cmd/merge_yaml/main.go app.yaml app.template.yaml env.yaml

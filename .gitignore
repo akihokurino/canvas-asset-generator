@@ -73,3 +73,5 @@ graph/model/models_gen.go
 .tmp
 gcp-cred.json
 .mod
+env.yaml
+app.yaml

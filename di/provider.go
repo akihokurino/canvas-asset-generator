@@ -14,6 +14,7 @@ import (
 	"canvas-server/infra/firebase"
 	"canvas-server/subscriber"
 	"canvas-server/usecase"
+	"os"
 
 	"github.com/google/wire"
 )
@@ -39,7 +40,10 @@ var providerSet = wire.NewSet(
 )
 
 func provideGCSClient() cloud_storage.Client {
-	return cloud_storage.NewClient("canvas-329810.appspot.com")
+	return cloud_storage.NewClient(
+		"canvas-329810",
+		"canvas-329810.appspot.com",
+		os.Getenv("SERVICE_ACCOUNT_PEM"))
 }
 
 func provideDSFactory() datastore.DSFactory {

@@ -2,6 +2,7 @@ package graph
 
 import (
 	"canvas-server/graph/dataloader"
+	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
 	"canvas-server/infra/datastore/thumbnail"
@@ -16,6 +17,7 @@ import (
 type Resolver struct {
 	contextProvider ContextProvider
 	fireClient      firebase.Client
+	gcsClient       cloud_storage.Client
 	transaction     datastore.Transaction
 	workRepo        work.Repository
 	thumbnailRepo   thumbnail.Repository
@@ -27,6 +29,7 @@ type Resolver struct {
 func NewResolver(
 	contextProvider ContextProvider,
 	fireClient firebase.Client,
+	gcsClient cloud_storage.Client,
 	transaction datastore.Transaction,
 	workRepo work.Repository,
 	thumbnailRepo thumbnail.Repository,
@@ -36,6 +39,7 @@ func NewResolver(
 	return &Resolver{
 		contextProvider: contextProvider,
 		fireClient:      fireClient,
+		gcsClient:       gcsClient,
 		transaction:     transaction,
 		workRepo:        workRepo,
 		thumbnailRepo:   thumbnailRepo,

@@ -1,6 +1,6 @@
 package model
 
 type Work struct {
-	ID        string `json:"id"`
-	VideoPath string `json:"videoPath"`
+	ID       string `json:"id"`
+	VideoUrl string `json:"videoPath"`
 }

@@ -26,3 +26,10 @@
 
 functions
 .idea
+.mod
+.tmp
+cmd
+docker-compose.yaml
+Dockerfile
+firebase.json
+.firebaserc

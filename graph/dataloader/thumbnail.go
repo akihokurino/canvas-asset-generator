@@ -13,18 +13,17 @@ type ThumbnailLoader struct {
 }
 
 func (l *ThumbnailLoader) Load(ctx context.Context, id string) ([]*thumbnail.Entity, error) {
-	thunk := l.loader.LoadMany(ctx, dataloader.NewKeysFromStrings([]string{id}))
-	results, errs := thunk()
-	if errs != nil && len(errs) > 0 {
-		return nil, errors.WithStack(errs[0])
+	thunk := l.loader.Load(ctx, dataloader.StringKey(id))
+	result, err := thunk()
+	if err != nil {
+		return nil, errors.WithStack(err)
 	}
 
-	items := make([]*thumbnail.Entity, 0, len(results))
-	for _, result := range results {
-		items = append(items, result.(*thumbnail.Entity))
+	if es, ok := result.([]*thumbnail.Entity); ok {
+		return es, nil
 	}
 
-	return items, nil
+	return make([]*thumbnail.Entity, 0), nil
 }
 
 func NewThumbnailLoader(thumbnailRepo thumbnail.Repository) *ThumbnailLoader {
@@ -34,16 +33,16 @@ func NewThumbnailLoader(thumbnailRepo thumbnail.Repository) *ThumbnailLoader {
 			ids = append(ids, key.String())
 		}
 
-		thumbnailEntities := make([]*thumbnail.Entity, 0)
+		thumbnailEntityMap := make(map[string][]*thumbnail.Entity, 0)
 		for _, id := range ids {
 			es, _ := thumbnailRepo.GetAllByWork(ctx, id)
-			thumbnailEntities = append(thumbnailEntities, es...)
+			thumbnailEntityMap[id] = es
 		}
 
 		results := make([]*dataloader.Result, len(keys))
 
-		for i, entity := range thumbnailEntities {
-			results[i] = &dataloader.Result{Data: entity, Error: nil}
+		for i, id := range ids {
+			results[i] = &dataloader.Result{Data: thumbnailEntityMap[id], Error: nil}
 		}
 
 		return results
