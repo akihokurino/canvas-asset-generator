@@ -99,7 +99,7 @@ func (c *client) Save(ctx context.Context, path string, data []byte) (*url.URL, 
 		return nil, errors.WithStack(err)
 	}
 
-	u, err := url.Parse(fmt.Sprintf("gs://%cli/%cli", c.bucketName, path))
+	u, err := url.Parse(fmt.Sprintf("gs://%s/%s", c.bucketName, path))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
