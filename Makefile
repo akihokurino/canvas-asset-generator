@@ -13,7 +13,7 @@ build:
 	GOOS=linux GOARCH=amd64 go build -o .tmp/main ./entrypoint/
 
 run-local:
-	go run entrypoint/main.go
+	docker-compose up
 
 deploy-gae:
 	gcloud app deploy --quiet --version 1 --project canvas-329810 app.yaml

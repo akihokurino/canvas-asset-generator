@@ -71,3 +71,5 @@ di/wire_gen.go
 graph/generated
 graph/model/models_gen.go
 .tmp
+gcp-cred.json
+.mod
