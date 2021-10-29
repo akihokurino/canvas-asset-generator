@@ -1,6 +1,8 @@
 MAKEFLAGS=--no-builtin-rules --no-builtin-variables --always-make
 ROOT := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
+INTERNAL_TOKEN := ""
+
 vendor:
 	go mod tidy
 
@@ -23,6 +25,9 @@ deploy-index:
 
 deploy-functions:
 	firebase deploy --only functions
+
+deploy-functions-env:
+	firebase functions:config:set token.internal=$(INTERNAL_TOKEN)
 
 gen-gcp-credential-pem:
 	openssl pkcs12 -in key.p12 -passin pass:notasecret -out key.pem -nodes

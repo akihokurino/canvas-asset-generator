@@ -1,5 +1,4 @@
 import * as functions from "firebase-functions";
-import * as path from "path";
 const { CloudTasksClient } = require("@google-cloud/tasks");
 
 const projectId = "canvas-329810";
@@ -8,18 +7,19 @@ const queue = "video-split-task";
 
 exports.queuingVideoSplitTask = functions
   .region(location)
-  .storage.object()
+  .storage
+  .bucket("canvas-329810-video")
+  .object()
   .onFinalize(async (object: functions.storage.ObjectMetadata) => {
     const filePath = object.name || "";
-    const fileDir = path.dirname(filePath);
-
-    if (fileDir !== "Video") {
+    const fileType = filePath.split(".").pop();
+    if (fileType != "mp4") {
+      console.log("mp4以外の拡張子はサポートしていません");
       return;
     }
 
     console.log("動画を分割するタスクをキューイングします");
     console.log(`ファイルパス ${filePath}`);
-    console.log(`ファイルディレクトリ ${fileDir}`);
 
     const tasksClient = new CloudTasksClient();
     const queuePath = tasksClient.queuePath(projectId, location, queue);
@@ -38,6 +38,7 @@ exports.queuingVideoSplitTask = functions
         body: Buffer.from(JSON.stringify(payload)).toString("base64"),
         headers: {
           "Content-Type": "application/json",
+          "Authorization": functions.config().token.internal,
         },
       },
       scheduleTime: {

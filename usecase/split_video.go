@@ -3,6 +3,7 @@ package usecase
 import (
 	"bufio"
 	"bytes"
+	"canvas-server/config"
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
@@ -41,13 +42,12 @@ func NewSplitVideo(
 	fcmTokenRepo fcm_token.Repository) SplitVideo {
 	return func(ctx context.Context, path string) error {
 		now := time.Now()
-		videoName := strings.Replace(path, "Video/", "", -1)
-		videoName = strings.Replace(videoName, ".mp4", "", -1)
+		videoName := strings.Replace(path, ".mp4", "", -1)
 
 		log.Printf("video path = %s", path)
 		log.Printf("video name = %s", videoName)
 
-		buf, err := gcsClient.Download(ctx, path)
+		buf, err := gcsClient.Download(ctx, config.VideoBucketName, path)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -70,19 +70,19 @@ func NewSplitVideo(
 			return errors.WithStack(err)
 		}
 
-		currents, err := gcsClient.List(ctx, fmt.Sprintf("Thumbnail/%s", videoName))
+		currents, err := gcsClient.List(ctx, config.ThumbnailBucketName, videoName)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 
 		for _, current := range currents {
 			log.Printf("deleted thumbnail path = %s", current)
-			if err := gcsClient.Delete(ctx, current); err != nil {
+			if err := gcsClient.Delete(ctx, config.ThumbnailBucketName, current); err != nil {
 				return errors.WithStack(err)
 			}
 		}
 
-		workEntity := work.NewEntity(videoName, gcsClient.FullPath(path), now)
+		workEntity := work.NewEntity(videoName, gcsClient.FullPath(config.VideoBucketName, path), now)
 		thumbnailEntities := make([]*thumbnail.Entity, 0)
 
 		for i := 0; i < durationSecond; i++ {
@@ -105,7 +105,7 @@ func NewSplitVideo(
 				return errors.WithStack(err)
 			}
 
-			u, err := gcsClient.Save(ctx, fmt.Sprintf("Thumbnail/%s/%d", videoName, i), buf.Bytes())
+			u, err := gcsClient.Save(ctx, config.ThumbnailBucketName, fmt.Sprintf("%s/%d", videoName, i), buf.Bytes())
 			if err != nil {
 				return errors.WithStack(err)
 			}

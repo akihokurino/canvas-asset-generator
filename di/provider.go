@@ -30,6 +30,7 @@ var providerSet = wire.NewSet(
 	ffmpeg.NewClient,
 	usecase.NewSplitVideo,
 	subscriber.NewSubscriber,
+	provideSubscriberAuthenticate,
 	dataloader.NewWorkLoader,
 	dataloader.NewThumbnailLoader,
 	graph.NewResolver,
@@ -42,12 +43,15 @@ var providerSet = wire.NewSet(
 func provideGCSClient() cloud_storage.Client {
 	return cloud_storage.NewClient(
 		"canvas-329810",
-		"canvas-329810.appspot.com",
 		os.Getenv("SERVICE_ACCOUNT_PEM"))
 }
 
 func provideDSFactory() datastore.DSFactory {
 	return datastore.NewDSFactory("canvas-329810")
+}
+
+func provideSubscriberAuthenticate() subscriber.Authenticate {
+	return subscriber.NewAuthenticate(os.Getenv("INTERNAL_TOKEN"))
 }
 
 func ResolveSubscriber() subscriber.Subscriber {

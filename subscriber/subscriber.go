@@ -10,7 +10,7 @@ import (
 
 type Subscriber func(mux *http.ServeMux)
 
-func NewSubscriber(splitVideo usecase.SplitVideo) Subscriber {
+func NewSubscriber(splitVideo usecase.SplitVideo, authenticate Authenticate) Subscriber {
 	videoSplit := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 
@@ -41,7 +41,21 @@ func NewSubscriber(splitVideo usecase.SplitVideo) Subscriber {
 		w.WriteHeader(http.StatusOK)
 	}
 
-	return func(mux *http.ServeMux) {
-		mux.HandleFunc("/video_split", videoSplit)
+	auth := func(server http.Handler) http.Handler {
+		return applyMiddleware(
+			server,
+			authenticate)
 	}
+
+	return func(mux *http.ServeMux) {
+		mux.Handle("/video_split", auth(http.HandlerFunc(videoSplit)))
+	}
+}
+
+func applyMiddleware(target http.Handler, handlers ...func(http.Handler) http.Handler) http.Handler {
+	h := target
+	for _, mw := range handlers {
+		h = mw(h)
+	}
+	return h
 }

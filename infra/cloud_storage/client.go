@@ -18,29 +18,29 @@ import (
 )
 
 type Client interface {
-	List(ctx context.Context, path string) ([]string, error)
-	Download(ctx context.Context, path string) (*bytes.Buffer, error)
-	Save(ctx context.Context, path string, data []byte) (*url.URL, error)
-	Delete(ctx context.Context, path string) error
-	FullPath(path string) string
+	List(ctx context.Context, bucket string, path string) ([]string, error)
+	Download(ctx context.Context, bucket string, path string) (*bytes.Buffer, error)
+	Save(ctx context.Context, bucket string, path string, data []byte) (*url.URL, error)
+	Delete(ctx context.Context, bucket string, path string) error
+	FullPath(bucket string, path string) string
 	Signature(gsURL *url.URL) (*url.URL, error)
 }
 
 type client struct {
 	projectID         string
-	bucketName        string
 	encodedPrivateKey string
 }
 
-func NewClient(projectID string, bucketName string, encodedPrivateKey string) Client {
+func NewClient(
+	projectID string,
+	encodedPrivateKey string) Client {
 	return &client{
 		projectID:         projectID,
-		bucketName:        bucketName,
 		encodedPrivateKey: encodedPrivateKey,
 	}
 }
 
-func (c *client) List(ctx context.Context, path string) ([]string, error) {
+func (c *client) List(ctx context.Context, bucket string, path string) ([]string, error) {
 	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -50,7 +50,7 @@ func (c *client) List(ctx context.Context, path string) ([]string, error) {
 	}()
 
 	results := make([]string, 0)
-	it := cli.Bucket(c.bucketName).Objects(ctx, &storage.Query{Prefix: path})
+	it := cli.Bucket(bucket).Objects(ctx, &storage.Query{Prefix: path})
 	for {
 		attrs, err := it.Next()
 		if err == iterator.Done {
@@ -66,7 +66,7 @@ func (c *client) List(ctx context.Context, path string) ([]string, error) {
 	return results, nil
 }
 
-func (c *client) Download(ctx context.Context, path string) (*bytes.Buffer, error) {
+func (c *client) Download(ctx context.Context, bucket string, path string) (*bytes.Buffer, error) {
 	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -75,7 +75,7 @@ func (c *client) Download(ctx context.Context, path string) (*bytes.Buffer, erro
 		_ = cli.Close()
 	}()
 
-	reader, err := cli.Bucket(c.bucketName).Object(path).NewReader(ctx)
+	reader, err := cli.Bucket(bucket).Object(path).NewReader(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -91,13 +91,13 @@ func (c *client) Download(ctx context.Context, path string) (*bytes.Buffer, erro
 	return &buf, nil
 }
 
-func (c *client) Save(ctx context.Context, path string, data []byte) (*url.URL, error) {
+func (c *client) Save(ctx context.Context, bucket string, path string, data []byte) (*url.URL, error) {
 	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
 
-	writer := cli.Bucket(c.bucketName).Object(path).NewWriter(ctx)
+	writer := cli.Bucket(bucket).Object(path).NewWriter(ctx)
 	defer func() {
 		_ = writer.Close()
 	}()
@@ -108,7 +108,7 @@ func (c *client) Save(ctx context.Context, path string, data []byte) (*url.URL, 
 		return nil, errors.WithStack(err)
 	}
 
-	u, err := url.Parse(fmt.Sprintf("gs://%s/%s", c.bucketName, path))
+	u, err := url.Parse(fmt.Sprintf("gs://%s/%s", bucket, path))
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
@@ -116,7 +116,7 @@ func (c *client) Save(ctx context.Context, path string, data []byte) (*url.URL, 
 	return u, err
 }
 
-func (c *client) Delete(ctx context.Context, path string) error {
+func (c *client) Delete(ctx context.Context, bucket string, path string) error {
 	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return errors.WithStack(err)
@@ -125,15 +125,15 @@ func (c *client) Delete(ctx context.Context, path string) error {
 		_ = cli.Close()
 	}()
 
-	if err := cli.Bucket(c.bucketName).Object(path).Delete(ctx); err != nil {
+	if err := cli.Bucket(bucket).Object(path).Delete(ctx); err != nil {
 		return errors.WithStack(err)
 	}
 
 	return nil
 }
 
-func (c *client) FullPath(path string) string {
-	return fmt.Sprintf("gs://%s/%s", c.bucketName, path)
+func (c *client) FullPath(bucket string, path string) string {
+	return fmt.Sprintf("gs://%s/%s", bucket, path)
 }
 
 func (c *client) Signature(gsURL *url.URL) (*url.URL, error) {
