@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/base64"
 	"fmt"
-	"log"
 	"net/url"
 	"strings"
 	"time"
@@ -153,8 +152,6 @@ func (c *client) Signature(gsURL *url.URL) (*url.URL, error) {
 
 	privateKey, _ := base64.StdEncoding.DecodeString(c.encodedPrivateKey)
 
-	log.Println(c.encodedPrivateKey)
-
 	urlStringWithSignature, err := storage.SignedURL(bucketID, objectID, &storage.SignedURLOptions{
 		GoogleAccessID: fmt.Sprintf("%s@appspot.gserviceaccount.com", c.projectID),
 		PrivateKey:     privateKey,
@@ -164,8 +161,6 @@ func (c *client) Signature(gsURL *url.URL) (*url.URL, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	}
-
-	log.Println(urlStringWithSignature)
 
 	urlWithSignature, err := gsURL.Parse(urlStringWithSignature)
 	if err != nil {

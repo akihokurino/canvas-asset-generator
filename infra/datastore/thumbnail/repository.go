@@ -46,7 +46,7 @@ func (r *repository) GetWithPager(ctx context.Context, pager *datastore.Pager) (
 	b := boom.FromClient(ctx, r.df(ctx))
 	q := b.Client.NewQuery(kind).
 		Offset(pager.Offset()).
-		Limit(pager.Limit()).
+		Limit(pager.LimitWithNextOne()).
 		Order("-CreatedAt")
 
 	var entities []*Entity
