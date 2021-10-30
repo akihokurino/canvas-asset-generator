@@ -33,3 +33,11 @@ func (p *Pager) Limit() int {
 		return defaultLimit
 	}
 }
+
+func (p *Pager) LimitWithNextOne() int {
+	if p.limit > 0 {
+		return int(p.limit) + 1
+	} else {
+		return defaultLimit + 1
+	}
+}

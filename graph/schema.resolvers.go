@@ -32,23 +32,36 @@ func (r *mutationResolver) RegisterFCMToken(ctx context.Context, input model.Reg
 	return true, nil
 }
 
-func (r *queryResolver) Works(ctx context.Context, page int, limit int) ([]*model.Work, error) {
-	workEntities, err := r.workRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
+func (r *queryResolver) Works(ctx context.Context, page int, limit int) (*model.WorkConnection, error) {
+	workEntities, hasNext, err := r.workRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
 	if err != nil {
 		return nil, err
 	}
 
-	resItems := make([]*model.Work, 0, len(workEntities))
+	edges := make([]*model.WorkEdge, 0, len(workEntities))
 	for _, entity := range workEntities {
 		ru, _ := url.Parse(entity.VideoPath)
 		su, _ := r.gcsClient.Signature(ru)
-		resItems = append(resItems, &model.Work{
-			ID:       entity.ID,
-			VideoUrl: su.String(),
+		edges = append(edges, &model.WorkEdge{
+			Node: &model.Work{
+				ID:       entity.ID,
+				VideoUrl: su.String(),
+			},
 		})
 	}
 
-	return resItems, nil
+	count, err := r.workRepo.GetTotalCount(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.WorkConnection{
+		Edges: edges,
+		PageInfo: &model.PageInfo{
+			TotalCount:  int(count),
+			HasNextPage: hasNext,
+		},
+	}, nil
 }
 
 func (r *queryResolver) Work(ctx context.Context, id string) (*model.Work, error) {
@@ -66,25 +79,38 @@ func (r *queryResolver) Work(ctx context.Context, id string) (*model.Work, error
 	}, nil
 }
 
-func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) ([]*model.Thumbnail, error) {
-	thumbnailEntities, err := r.thumbnailRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
+func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*model.ThumbnailConnection, error) {
+	thumbnailEntities, hasNext, err := r.thumbnailRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
 	if err != nil {
 		return nil, err
 	}
 
-	resItems := make([]*model.Thumbnail, 0, len(thumbnailEntities))
+	edges := make([]*model.ThumbnailEdge, 0, len(thumbnailEntities))
 	for _, entity := range thumbnailEntities {
 		ru, _ := url.Parse(entity.ImagePath)
 		su, _ := r.gcsClient.Signature(ru)
 
-		resItems = append(resItems, &model.Thumbnail{
-			ID:       entity.ID,
-			WorkID:   entity.WorkID,
-			ImageUrl: su.String(),
+		edges = append(edges, &model.ThumbnailEdge{
+			Node: &model.Thumbnail{
+				ID:       entity.ID,
+				WorkID:   entity.WorkID,
+				ImageUrl: su.String(),
+			},
 		})
 	}
 
-	return resItems, nil
+	count, err := r.thumbnailRepo.GetTotalCount(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &model.ThumbnailConnection{
+		Edges: edges,
+		PageInfo: &model.PageInfo{
+			TotalCount:  int(count),
+			HasNextPage: hasNext,
+		},
+	}, nil
 }
 
 func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*model.Work, error) {

@@ -11,9 +11,10 @@ import (
 )
 
 type Repository interface {
-	GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, error)
+	GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, bool, error)
 	GetAllByWork(ctx context.Context, workID string) ([]*Entity, error)
 	GetMulti(ctx context.Context, ids []string) ([]*Entity, error)
+	GetTotalCount(ctx context.Context) (int64, error)
 	Put(tx *boom.Transaction, item *Entity) error
 	Delete(tx *boom.Transaction, id string) error
 }
@@ -28,7 +29,20 @@ type repository struct {
 	df datastore.DSFactory
 }
 
-func (r *repository) GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, error) {
+func (r *repository) returnWithHasNext(items []*Entity, pager *datastore.Pager) ([]*Entity, bool, error) {
+	res := items
+	hasNext := false
+	if len(items) == pager.LimitWithNextOne() {
+		hasNext = true
+		res = items[:pager.Limit()]
+	} else {
+		hasNext = false
+	}
+
+	return res, hasNext, nil
+}
+
+func (r *repository) GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, bool, error) {
 	b := boom.FromClient(ctx, r.df(ctx))
 	q := b.Client.NewQuery(kind).
 		Offset(pager.Offset()).
@@ -37,10 +51,10 @@ func (r *repository) GetWithPager(ctx context.Context, pager *datastore.Pager) (
 
 	var entities []*Entity
 	if _, err := b.GetAll(q, &entities); err != nil {
-		return nil, errors.WithStack(err)
+		return nil, false, errors.WithStack(err)
 	}
 
-	return entities, nil
+	return r.returnWithHasNext(entities, pager)
 }
 
 func (r *repository) GetAllByWork(ctx context.Context, workID string) ([]*Entity, error) {
@@ -83,6 +97,18 @@ func (r *repository) GetMulti(ctx context.Context, ids []string) ([]*Entity, err
 	}
 
 	return entities, nil
+}
+
+func (r *repository) GetTotalCount(ctx context.Context) (int64, error) {
+	b := boom.FromClient(ctx, r.df(ctx))
+	q := b.Client.NewQuery(kind)
+
+	count, err := b.Count(q)
+	if err != nil {
+		return 0, errors.WithStack(err)
+	}
+
+	return int64(count), nil
 }
 
 func (r *repository) Put(tx *boom.Transaction, item *Entity) error {
