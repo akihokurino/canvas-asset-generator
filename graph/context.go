@@ -8,7 +8,7 @@ import (
 
 const authUidStoreKey = "__auth_uid_store_key__"
 const thumbnailDataLoaderStoreKey = "__thumbnail_dataloader_store_key__"
-const workDataLoaderStoreKey = "__thumbnail_dataloader_store_key__"
+const workDataLoaderStoreKey = "__work_dataloader_store_key__"
 
 type ContextProvider interface {
 	WithAuthUID(ctx context.Context, uid firebase.UID) context.Context
@@ -35,7 +35,7 @@ func (u *contextProvider) WithAuthUID(ctx context.Context, uid firebase.UID) con
 func (u *contextProvider) MustAuthUID(ctx context.Context) firebase.UID {
 	v, ok := ctx.Value(authUidStoreKey).(firebase.UID)
 	if !ok {
-		panic("not found")
+		panic("not found uid")
 	}
 	return v
 }
@@ -47,7 +47,7 @@ func (u *contextProvider) WithThumbnailDataloader(ctx context.Context, loader *d
 func (u *contextProvider) MustThumbnailDataloader(ctx context.Context) *dataloader.ThumbnailLoader {
 	v, ok := ctx.Value(thumbnailDataLoaderStoreKey).(*dataloader.ThumbnailLoader)
 	if !ok {
-		panic("not found")
+		panic("not found thumbnail dataloader")
 	}
 	return v
 }
@@ -59,7 +59,7 @@ func (u *contextProvider) WithWorkDataloader(ctx context.Context, loader *datalo
 func (u *contextProvider) MustWorkDataloader(ctx context.Context) *dataloader.WorkLoader {
 	v, ok := ctx.Value(workDataLoaderStoreKey).(*dataloader.WorkLoader)
 	if !ok {
-		panic("not found")
+		panic("not found work dataloader")
 	}
 	return v
 }

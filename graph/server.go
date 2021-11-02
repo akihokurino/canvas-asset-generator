@@ -11,7 +11,7 @@ import (
 type Server func(mux *http.ServeMux)
 
 func NewServer(resolver *Resolver, authenticate Authenticate, cros CROS, dataloader Dataloader) Server {
-	auth := func(server *handler.Server) http.Handler {
+	mw := func(server *handler.Server) http.Handler {
 		return applyMiddleware(
 			server,
 			dataloader,
@@ -23,7 +23,7 @@ func NewServer(resolver *Resolver, authenticate Authenticate, cros CROS, dataloa
 		srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: resolver}))
 
 		http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-		http.Handle("/query", auth(srv))
+		http.Handle("/query", mw(srv))
 	}
 }
 
