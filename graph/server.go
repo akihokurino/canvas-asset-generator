@@ -10,10 +10,11 @@ import (
 
 type Server func(mux *http.ServeMux)
 
-func NewServer(resolver *Resolver, authenticate Authenticate, cros CROS) Server {
+func NewServer(resolver *Resolver, authenticate Authenticate, cros CROS, dataloader Dataloader) Server {
 	auth := func(server *handler.Server) http.Handler {
 		return applyMiddleware(
 			server,
+			dataloader,
 			authenticate,
 			cros)
 	}

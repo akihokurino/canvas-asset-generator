@@ -114,7 +114,9 @@ func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*m
 }
 
 func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*model.Work, error) {
-	workEntity, err := r.workLoader.Load(ctx, obj.WorkID)
+	workLoader := r.contextProvider.MustWorkDataloader(ctx)
+
+	workEntity, err := workLoader.Load(ctx, obj.WorkID)
 	if err != nil {
 		return nil, err
 	}
@@ -129,7 +131,9 @@ func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*mo
 }
 
 func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work) ([]*model.Thumbnail, error) {
-	thumbnailEntities, err := r.thumbnailLoader.Load(ctx, obj.ID)
+	thumbnailLoader := r.contextProvider.MustThumbnailDataloader(ctx)
+
+	thumbnailEntities, err := thumbnailLoader.Load(ctx, obj.ID)
 	if err != nil {
 		return nil, err
 	}

@@ -20,8 +20,7 @@ func NewAuthenticate(
 			ctx := r.Context()
 
 			if uid := r.Header.Get(debugAuthKey); uid != "" {
-				newContext, _ := contextProvider.WithAuthUID(ctx, firebase.UID(uid))
-				base.ServeHTTP(w, r.WithContext(newContext))
+				base.ServeHTTP(w, r.WithContext(contextProvider.WithAuthUID(ctx, firebase.UID(uid))))
 			} else {
 				token := r.Header.Get(authKey)
 				if len(token) <= 7 {
@@ -35,8 +34,7 @@ func NewAuthenticate(
 					return
 				}
 
-				newContext, _ := contextProvider.WithAuthUID(ctx, uid)
-				base.ServeHTTP(w, r.WithContext(newContext))
+				base.ServeHTTP(w, r.WithContext(contextProvider.WithAuthUID(ctx, uid)))
 			}
 		})
 	}

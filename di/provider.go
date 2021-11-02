@@ -4,7 +4,6 @@ package di
 
 import (
 	"canvas-server/graph"
-	"canvas-server/graph/dataloader"
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
@@ -31,12 +30,11 @@ var providerSet = wire.NewSet(
 	usecase.NewSplitVideo,
 	subscriber.NewSubscriber,
 	provideSubscriberAuthenticate,
-	dataloader.NewWorkLoader,
-	dataloader.NewThumbnailLoader,
 	graph.NewResolver,
 	graph.NewServer,
 	graph.NewContextProvider,
 	graph.NewAuthenticate,
+	graph.NewDataloader,
 	graph.NewCROS,
 )
 
