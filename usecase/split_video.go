@@ -97,7 +97,7 @@ func NewSplitVideo(
 			}
 
 			subImage := imgSource.(SubImager).SubImage(
-				image.Rect(0, 300, imgSource.Bounds().Dx(), imgSource.Bounds().Dy()-250),
+				image.Rect(0, 300, imgSource.Bounds().Dx(), imgSource.Bounds().Dy()-300),
 			)
 
 			buf := bytes.NewBuffer(nil)
