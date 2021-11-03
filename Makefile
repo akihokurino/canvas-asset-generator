@@ -17,7 +17,7 @@ build:
 run-local:
 	docker-compose up
 
-deploy-gae:
+deploy-gae: vendor gen build gen-app-yaml
 	gcloud app deploy --quiet --version 1 --project canvas-329810 app.yaml
 
 deploy-index:

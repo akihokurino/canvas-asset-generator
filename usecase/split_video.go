@@ -17,6 +17,7 @@ import (
 	"image/jpeg"
 	"io/ioutil"
 	"log"
+	"math"
 	"strings"
 	"time"
 
@@ -47,6 +48,8 @@ func NewSplitVideo(
 		log.Printf("video path = %s", path)
 		log.Printf("video name = %s", videoName)
 
+		log.Printf("---------- download video ----------")
+
 		buf, err := gcsClient.Download(ctx, config.VideoBucketName, path)
 		if err != nil {
 			return errors.WithStack(err)
@@ -58,17 +61,11 @@ func NewSplitVideo(
 		}
 
 		writer := bufio.NewWriter(file)
-
 		if _, err := writer.Write(buf.Bytes()); err != nil {
 			return errors.WithStack(err)
 		}
 
-		tmpPath := file.Name()
-
-		durationSecond, err := ffmpegClient.DurationSecond(ctx, tmpPath)
-		if err != nil {
-			return errors.WithStack(err)
-		}
+		log.Printf("---------- delete current thumbnails ----------")
 
 		currents, err := gcsClient.List(ctx, config.ThumbnailBucketName, videoName)
 		if err != nil {
@@ -82,10 +79,23 @@ func NewSplitVideo(
 			}
 		}
 
+		log.Printf("---------- prepare split video ----------")
+
+		tmpPath := file.Name()
+		durationSecond, err := ffmpegClient.DurationSecond(ctx, tmpPath)
+		if err != nil {
+			return errors.WithStack(err)
+		}
+		totalSecond := int(math.Min(float64(durationSecond), 30))
+
+		log.Printf("total second %d", totalSecond)
+
 		workEntity := work.NewEntity(videoName, gcsClient.FullPath(config.VideoBucketName, path), now)
 		thumbnailEntities := make([]*thumbnail.Entity, 0)
 
-		for i := 0; i < durationSecond; i++ {
+		for i := 0; i < totalSecond; i++ {
+			log.Printf("---------- split video of %d ----------", i)
+
 			data, err := ffmpegClient.Video2Thumbnail(tmpPath, i)
 			if err != nil {
 				return errors.WithStack(err)
@@ -110,7 +120,7 @@ func NewSplitVideo(
 				return errors.WithStack(err)
 			}
 
-			log.Printf("thumbnail url %s", u.String())
+			log.Printf("splited thumbnail url %s", u.String())
 			thumbnailEntities = append(thumbnailEntities, thumbnail.NewEntity(workEntity.ID, u.String(), i, now))
 		}
 
@@ -118,6 +128,8 @@ func NewSplitVideo(
 		if err != nil {
 			return errors.WithStack(err)
 		}
+
+		log.Printf("---------- delete and create datastore entities ----------")
 
 		eg := errgroup.Group{}
 
@@ -148,6 +160,8 @@ func NewSplitVideo(
 		if err := eg.Wait(); err != nil {
 			return errors.WithStack(err)
 		}
+
+		log.Printf("---------- send push notification for complete ----------")
 
 		tokens, err := fcmTokenRepo.GetAll(ctx)
 		if err != nil {
