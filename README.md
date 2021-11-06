@@ -14,4 +14,4 @@
 - datastore
 - boom（ https://github.com/mercari/datastore ）
 
-<img width="936" alt="スクリーンショット 2021-11-04 0 06 08" src="https://user-images.githubusercontent.com/2268288/140086717-4e62590e-58c7-4cae-930c-fd2baa7d4017.png">
+<img width="933" alt="スクリーンショット 2021-11-07 2 04 01" src="https://user-images.githubusercontent.com/2268288/140617843-e45f77d2-7827-44c7-aeb2-7c933363e372.png">
