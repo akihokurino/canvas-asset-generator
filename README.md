@@ -1,6 +1,4 @@
-# canvas-server
-
-## 構成
+## Specs
 - app engine 2nd
 - go 1.5.0
 - gqlgen（ https://github.com/99designs/gqlgen ）
