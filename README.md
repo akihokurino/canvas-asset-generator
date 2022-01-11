@@ -7,6 +7,7 @@
 - firebase cloud storage
 - firebase auth
 - cloud task
+- cloud scheduler
 - ffmpeg（ https://github.com/u2takey/ffmpeg-go ）
 - wire（ https://github.com/google/wire ）
 - datastore

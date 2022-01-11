@@ -21,7 +21,10 @@ deploy-gae: vendor gen build gen-app-yaml
 	gcloud app deploy --quiet --version 1 --project canvas-329810 app.yaml
 
 deploy-index:
-	gcloud app deploy --quiet index.yaml
+	gcloud app deploy --quiet --project canvas-329810 index.yaml
+
+deploy-cron:
+	gcloud app deploy --quiet --project canvas-329810 cron.yaml
 
 deploy-functions:
 	firebase deploy --only functions

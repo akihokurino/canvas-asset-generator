@@ -11,6 +11,7 @@ import (
 )
 
 type Repository interface {
+	GetAll(ctx context.Context) ([]*Entity, error)
 	GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, bool, error)
 	GetMulti(ctx context.Context, ids []string) ([]*Entity, error)
 	Get(ctx context.Context, id string) (*Entity, error)
@@ -39,6 +40,18 @@ func (r *repository) returnWithHasNext(items []*Entity, pager *datastore.Pager) 
 	}
 
 	return res, hasNext, nil
+}
+
+func (r *repository) GetAll(ctx context.Context) ([]*Entity, error) {
+	b := boom.FromClient(ctx, r.df(ctx))
+	q := b.Client.NewQuery(kind).Order("-CreatedAt")
+
+	var entities []*Entity
+	if _, err := b.GetAll(q, &entities); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return entities, nil
 }
 
 func (r *repository) GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, bool, error) {

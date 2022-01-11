@@ -115,7 +115,12 @@ func NewSplitVideo(
 				return errors.WithStack(err)
 			}
 
-			u, err := gcsClient.Save(ctx, config.ThumbnailBucketName, fmt.Sprintf("%s/%d", videoName, i), buf.Bytes())
+			u, err := gcsClient.Save(
+				ctx,
+				config.ThumbnailBucketName,
+				fmt.Sprintf("%s/%d", videoName, i),
+				buf.Bytes(),
+				"image/jpeg")
 			if err != nil {
 				return errors.WithStack(err)
 			}

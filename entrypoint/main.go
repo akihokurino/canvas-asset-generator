@@ -19,6 +19,7 @@ func main() {
 	mux := http.DefaultServeMux
 
 	di.ResolveSubscriber()(mux)
+	di.ResolveBatch()(mux)
 	di.ResolveGraphQL()(mux)
 
 	port := os.Getenv("PORT")

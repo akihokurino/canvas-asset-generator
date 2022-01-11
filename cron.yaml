@@ -1,0 +1,6 @@
+cron:
+- description: export
+  url: /export
+  schedule: every day 10:00
+  timezone: Asia/Tokyo
+  target: default

@@ -19,7 +19,7 @@ import (
 type Client interface {
 	List(ctx context.Context, bucket string, path string) ([]string, error)
 	Download(ctx context.Context, bucket string, path string) (*bytes.Buffer, error)
-	Save(ctx context.Context, bucket string, path string, data []byte) (*url.URL, error)
+	Save(ctx context.Context, bucket string, path string, data []byte, contentType string) (*url.URL, error)
 	Delete(ctx context.Context, bucket string, path string) error
 	FullPath(bucket string, path string) string
 	Signature(gsURL *url.URL) (*url.URL, error)
@@ -90,7 +90,7 @@ func (c *client) Download(ctx context.Context, bucket string, path string) (*byt
 	return &buf, nil
 }
 
-func (c *client) Save(ctx context.Context, bucket string, path string, data []byte) (*url.URL, error) {
+func (c *client) Save(ctx context.Context, bucket string, path string, data []byte, contentType string) (*url.URL, error) {
 	cli, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, errors.WithStack(err)
@@ -101,7 +101,7 @@ func (c *client) Save(ctx context.Context, bucket string, path string, data []by
 		_ = writer.Close()
 	}()
 
-	writer.ContentType = "image/jpeg"
+	writer.ContentType = contentType
 
 	if _, err := writer.Write(data); err != nil {
 		return nil, errors.WithStack(err)

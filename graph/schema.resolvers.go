@@ -40,12 +40,12 @@ func (r *queryResolver) Works(ctx context.Context, page int, limit int) (*model.
 
 	edges := make([]*model.WorkEdge, 0, len(workEntities))
 	for _, entity := range workEntities {
-		ru, _ := url.Parse(entity.VideoPath)
-		su, _ := r.gcsClient.Signature(ru)
+		videoPath, _ := url.Parse(entity.VideoPath)
+		signedVideoURL, _ := r.gcsClient.Signature(videoPath)
 		edges = append(edges, &model.WorkEdge{
 			Node: &model.Work{
 				ID:       entity.ID,
-				VideoUrl: su.String(),
+				VideoUrl: signedVideoURL.String(),
 			},
 		})
 	}
@@ -70,12 +70,12 @@ func (r *queryResolver) Work(ctx context.Context, id string) (*model.Work, error
 		return nil, err
 	}
 
-	ru, _ := url.Parse(workEntity.VideoPath)
-	su, _ := r.gcsClient.Signature(ru)
+	videoPath, _ := url.Parse(workEntity.VideoPath)
+	signedVideoURL, _ := r.gcsClient.Signature(videoPath)
 
 	return &model.Work{
 		ID:       workEntity.ID,
-		VideoUrl: su.String(),
+		VideoUrl: signedVideoURL.String(),
 	}, nil
 }
 
@@ -87,14 +87,14 @@ func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*m
 
 	edges := make([]*model.ThumbnailEdge, 0, len(thumbnailEntities))
 	for _, entity := range thumbnailEntities {
-		ru, _ := url.Parse(entity.ImagePath)
-		su, _ := r.gcsClient.Signature(ru)
+		imagePath, _ := url.Parse(entity.ImagePath)
+		signedImageURL, _ := r.gcsClient.Signature(imagePath)
 
 		edges = append(edges, &model.ThumbnailEdge{
 			Node: &model.Thumbnail{
 				ID:       entity.ID,
 				WorkID:   entity.WorkID,
-				ImageUrl: su.String(),
+				ImageUrl: signedImageURL.String(),
 			},
 		})
 	}
@@ -121,12 +121,12 @@ func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*mo
 		return nil, err
 	}
 
-	ru, _ := url.Parse(workEntity.VideoPath)
-	su, _ := r.gcsClient.Signature(ru)
+	videoPath, _ := url.Parse(workEntity.VideoPath)
+	signedVideoURL, _ := r.gcsClient.Signature(videoPath)
 
 	return &model.Work{
 		ID:       workEntity.ID,
-		VideoUrl: su.String(),
+		VideoUrl: signedVideoURL.String(),
 	}, nil
 }
 
@@ -140,13 +140,13 @@ func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work) ([]*mode
 
 	resItems := make([]*model.Thumbnail, 0, len(thumbnailEntities))
 	for _, entity := range thumbnailEntities {
-		ru, _ := url.Parse(entity.ImagePath)
-		su, _ := r.gcsClient.Signature(ru)
+		imagePath, _ := url.Parse(entity.ImagePath)
+		signedImageURL, _ := r.gcsClient.Signature(imagePath)
 
 		resItems = append(resItems, &model.Thumbnail{
 			ID:       entity.ID,
 			WorkID:   entity.WorkID,
-			ImageUrl: su.String(),
+			ImageUrl: signedImageURL.String(),
 		})
 	}
 

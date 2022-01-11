@@ -3,6 +3,7 @@
 package di
 
 import (
+	"canvas-server/batch"
 	"canvas-server/graph"
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
@@ -30,6 +31,7 @@ var providerSet = wire.NewSet(
 	usecase.NewSplitVideo,
 	subscriber.NewSubscriber,
 	provideSubscriberAuthenticate,
+	batch.NewBatch,
 	graph.NewResolver,
 	graph.NewServer,
 	graph.NewContextProvider,
@@ -53,6 +55,10 @@ func provideSubscriberAuthenticate() subscriber.Authenticate {
 }
 
 func ResolveSubscriber() subscriber.Subscriber {
+	panic(wire.Build(providerSet))
+}
+
+func ResolveBatch() batch.Batch {
 	panic(wire.Build(providerSet))
 }
 
