@@ -12,12 +12,12 @@ import (
 	"net/http"
 )
 
-type Batch func(mux *http.ServeMux)
+type Server func(mux *http.ServeMux)
 
-func NewBatch(
+func NewServer(
 	gcsClient cloud_storage.Client,
 	workRepo work.Repository,
-	thumbnailRepo thumbnail.Repository) Batch {
+	thumbnailRepo thumbnail.Repository) Server {
 	export := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 

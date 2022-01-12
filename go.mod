@@ -11,6 +11,7 @@ require (
 	github.com/google/uuid v1.3.0
 	github.com/google/wire v0.5.0
 	github.com/graph-gophers/dataloader v5.0.0+incompatible
+	github.com/improbable-eng/grpc-web v0.15.0
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/u2takey/ffmpeg-go v0.3.0
@@ -19,6 +20,8 @@ require (
 	golang.org/x/net v0.0.0-20211020060615-d418f374d309 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.58.0
+	google.golang.org/grpc v1.40.0
+	google.golang.org/protobuf v1.27.1
 	gopkg.in/vansante/go-ffprobe.v2 v2.0.3
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.3.0
 )

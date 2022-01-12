@@ -2,7 +2,7 @@ service: default
 runtime: go115
 instance_class: F2
 
-main: ./entrypoint
+main: ./entrypoint/default
 
 handlers:
 - url: /.*

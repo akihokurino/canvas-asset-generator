@@ -75,3 +75,5 @@ gcp-cred.json
 .mod
 env.yaml
 app.yaml
+internal/proto/go
+grpc/web/node_modules

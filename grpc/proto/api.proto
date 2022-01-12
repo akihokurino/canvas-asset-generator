@@ -1,0 +1,15 @@
+syntax = "proto3";
+option go_package = "./pb";
+package service;
+
+service InternalAPI {
+  rpc SignedGSURLs (SignedGSURLsRequest) returns (SignedGSURLsResponse);
+}
+
+message SignedGSURLsRequest {
+  repeated string gsURLs = 1;
+}
+
+message SignedGSURLsResponse {
+  repeated string urls = 1;
+}

@@ -8,9 +8,9 @@ import (
 	"net/http"
 )
 
-type Subscriber func(mux *http.ServeMux)
+type Server func(mux *http.ServeMux)
 
-func NewSubscriber(splitVideo usecase.SplitVideo, authenticate Authenticate) Subscriber {
+func NewServer(splitVideo usecase.SplitVideo, authenticate Authenticate) Server {
 	videoSplit := func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 

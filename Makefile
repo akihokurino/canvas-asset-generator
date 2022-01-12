@@ -2,6 +2,9 @@ MAKEFLAGS=--no-builtin-rules --no-builtin-variables --always-make
 ROOT := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 
 INTERNAL_TOKEN := ""
+GO_DIST := grpc/proto/go
+TS_DIST := grpc/web/src/rpc
+PROTOC_GEN_TS_PATH := "grpc/web/node_modules/.bin/protoc-gen-ts"
 
 vendor:
 	go mod tidy
@@ -11,13 +14,38 @@ gen:
 	cp di/wire_gen.default.go di/wire_gen.go
 	go generate di/wire_gen.go
 
+gen-proto:
+	mkdir -p $(GO_DIST)
+	rm -f $(GO_DIST)/*
+	protoc --proto_path=grpc/proto/. \
+           --go-grpc_opt require_unimplemented_servers=false,paths=source_relative \
+           --go-grpc_out $(GO_DIST) \
+           --go_opt paths=source_relative \
+           --go_out $(GO_DIST) \
+           grpc/proto/*.proto
+
+gen-proto-client:
+	mkdir -p $(TS_DIST)
+	rm -f $(TS_DIST)/*
+	protoc --proto_path=grpc/proto/. \
+    	   --plugin="protoc-gen-ts=$(PROTOC_GEN_TS_PATH)" \
+           --js_out=import_style=commonjs,binary:$(TS_DIST) \
+           --ts_out=service=grpc-web:$(TS_DIST) \
+           grpc/proto/*.proto
+	find grpc/web/src/rpc -type f -name "*_pb.js" | xargs gsed -i -e "1i /* eslint-disable */"
+	find grpc/web/src/rpc -type f -name "*_pb_service.js" | xargs gsed -i -e "1i /* eslint-disable */"
+
 build:
 	GOOS=linux GOARCH=amd64 go build -o .tmp/main ./entrypoint/
 
 run-local:
+	go run cmd/merge_yaml/main.go app.yaml entrypoint/default/app.template.yaml env.yaml
 	docker-compose up
 
-deploy-gae: vendor gen build gen-app-yaml
+deploy-gae: vendor gen build
+	go run cmd/merge_yaml/main.go app.yaml entrypoint/default/app.template.yaml env.yaml
+	gcloud app deploy --quiet --version 1 --project canvas-329810 app.yaml
+	go run cmd/merge_yaml/main.go app.yaml entrypoint/grpc/app.template.yaml env.yaml
 	gcloud app deploy --quiet --version 1 --project canvas-329810 app.yaml
 
 deploy-index:
@@ -35,6 +63,3 @@ deploy-functions-env:
 gen-gcp-credential-pem:
 	openssl pkcs12 -in key.p12 -passin pass:notasecret -out key.pem -nodes
 	cat key.pem | base64
-
-gen-app-yaml:
-	go run cmd/merge_yaml/main.go app.yaml app.template.yaml env.yaml

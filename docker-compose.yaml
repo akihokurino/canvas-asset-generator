@@ -15,7 +15,7 @@ services:
     command:
       - "sh"
       - "-c"
-      - "go run /app/entrypoint/main.go"
+      - "go run /app/entrypoint/default/main.go"
     environment:
       - IS_LOCAL=true
       - GOOGLE_APPLICATION_CREDENTIALS=/app/gcp-cred.json

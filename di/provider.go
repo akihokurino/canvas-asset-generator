@@ -5,6 +5,7 @@ package di
 import (
 	"canvas-server/batch"
 	"canvas-server/graph"
+	"canvas-server/grpc"
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
@@ -29,15 +30,18 @@ var providerSet = wire.NewSet(
 	fcm_token.NewRepository,
 	ffmpeg.NewClient,
 	usecase.NewSplitVideo,
-	subscriber.NewSubscriber,
+	subscriber.NewServer,
 	provideSubscriberAuthenticate,
-	batch.NewBatch,
+	batch.NewServer,
 	graph.NewResolver,
 	graph.NewServer,
 	graph.NewContextProvider,
 	graph.NewAuthenticate,
 	graph.NewDataloader,
 	graph.NewCROS,
+	grpc.NewAPI,
+	grpc.NewServer,
+	provideGRPCAuthenticate,
 )
 
 func provideGCSClient() cloud_storage.Client {
@@ -54,14 +58,22 @@ func provideSubscriberAuthenticate() subscriber.Authenticate {
 	return subscriber.NewAuthenticate(os.Getenv("INTERNAL_TOKEN"))
 }
 
-func ResolveSubscriber() subscriber.Subscriber {
+func provideGRPCAuthenticate() grpc.Authenticate {
+	return grpc.NewAuthenticate(os.Getenv("INTERNAL_TOKEN"))
+}
+
+func ResolveSubscriber() subscriber.Server {
 	panic(wire.Build(providerSet))
 }
 
-func ResolveBatch() batch.Batch {
+func ResolveBatch() batch.Server {
 	panic(wire.Build(providerSet))
 }
 
 func ResolveGraphQL() graph.Server {
+	panic(wire.Build(providerSet))
+}
+
+func ResolveGRPC() grpc.Server {
 	panic(wire.Build(providerSet))
 }

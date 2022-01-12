@@ -1,0 +1,9 @@
+service: grpc
+runtime: go115
+
+main: ./entrypoint/grpc
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always

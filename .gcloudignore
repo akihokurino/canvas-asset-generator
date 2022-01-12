@@ -33,3 +33,4 @@ docker-compose.yaml
 Dockerfile
 firebase.json
 .firebaserc
+grpc/web
