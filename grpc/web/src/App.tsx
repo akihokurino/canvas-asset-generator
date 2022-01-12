@@ -2,16 +2,16 @@ import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { InternalAPIClient } from "./rpc/api_pb_service";
-import { SignedGSURLsRequest, SignedGSURLsResponse } from "./rpc/api_pb";
+import { SignedGsUrlsRequest } from "./rpc/api_pb";
 
 function App() {
   React.useEffect(() => {
     const client = new InternalAPIClient("https://grpc-dot-canvas-329810.an.r.appspot.com");
-    const req = new SignedGSURLsRequest();
-    req.setGsurlsList([
+    const req = new SignedGsUrlsRequest();
+    req.setGsUrlsList([
       "gs://canvas-329810-video/ColorRain.mp4"
     ])
-    client.signedGSURLs(req, (err, res) => {
+    client.signedGsUrls(req, (err, res) => {
       console.log(err);
       res?.getUrlsList().forEach((url) => {
         console.log(url);

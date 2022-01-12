@@ -68,16 +68,16 @@ func NewAPI(gcsClient cloud_storage.Client) pb.InternalAPIServer {
 	}
 }
 
-func (a *api) SignedGSURLs(ctx context.Context, req *pb.SignedGSURLsRequest) (*pb.SignedGSURLsResponse, error) {
-	results := make([]string, 0, len(req.GsURLs))
+func (a *api) SignedGsUrls(ctx context.Context, req *pb.SignedGsUrlsRequest) (*pb.SignedGsUrlsResponse, error) {
+	results := make([]string, 0, len(req.GsUrls))
 
-	for _, gsURL := range req.GsURLs {
+	for _, gsURL := range req.GsUrls {
 		u, _ := url.Parse(gsURL)
 		signedURL, _ := a.gcsClient.Signature(u)
 		results = append(results, signedURL.String())
 	}
 
-	return &pb.SignedGSURLsResponse{
+	return &pb.SignedGsUrlsResponse{
 		Urls: results,
 	}, nil
 }

@@ -3,13 +3,13 @@ option go_package = "./pb";
 package service;
 
 service InternalAPI {
-  rpc SignedGSURLs (SignedGSURLsRequest) returns (SignedGSURLsResponse);
+  rpc SignedGsUrls (SignedGsUrlsRequest) returns (SignedGsUrlsResponse);
 }
 
-message SignedGSURLsRequest {
-  repeated string gsURLs = 1;
+message SignedGsUrlsRequest {
+  repeated string gs_urls = 1;
 }
 
-message SignedGSURLsResponse {
+message SignedGsUrlsResponse {
   repeated string urls = 1;
 }

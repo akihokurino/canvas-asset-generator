@@ -18,7 +18,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type InternalAPIClient interface {
-	SignedGSURLs(ctx context.Context, in *SignedGSURLsRequest, opts ...grpc.CallOption) (*SignedGSURLsResponse, error)
+	SignedGsUrls(ctx context.Context, in *SignedGsUrlsRequest, opts ...grpc.CallOption) (*SignedGsUrlsResponse, error)
 }
 
 type internalAPIClient struct {
@@ -29,9 +29,9 @@ func NewInternalAPIClient(cc grpc.ClientConnInterface) InternalAPIClient {
 	return &internalAPIClient{cc}
 }
 
-func (c *internalAPIClient) SignedGSURLs(ctx context.Context, in *SignedGSURLsRequest, opts ...grpc.CallOption) (*SignedGSURLsResponse, error) {
-	out := new(SignedGSURLsResponse)
-	err := c.cc.Invoke(ctx, "/service.InternalAPI/SignedGSURLs", in, out, opts...)
+func (c *internalAPIClient) SignedGsUrls(ctx context.Context, in *SignedGsUrlsRequest, opts ...grpc.CallOption) (*SignedGsUrlsResponse, error) {
+	out := new(SignedGsUrlsResponse)
+	err := c.cc.Invoke(ctx, "/service.InternalAPI/SignedGsUrls", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -42,15 +42,15 @@ func (c *internalAPIClient) SignedGSURLs(ctx context.Context, in *SignedGSURLsRe
 // All implementations should embed UnimplementedInternalAPIServer
 // for forward compatibility
 type InternalAPIServer interface {
-	SignedGSURLs(context.Context, *SignedGSURLsRequest) (*SignedGSURLsResponse, error)
+	SignedGsUrls(context.Context, *SignedGsUrlsRequest) (*SignedGsUrlsResponse, error)
 }
 
 // UnimplementedInternalAPIServer should be embedded to have forward compatible implementations.
 type UnimplementedInternalAPIServer struct {
 }
 
-func (UnimplementedInternalAPIServer) SignedGSURLs(context.Context, *SignedGSURLsRequest) (*SignedGSURLsResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method SignedGSURLs not implemented")
+func (UnimplementedInternalAPIServer) SignedGsUrls(context.Context, *SignedGsUrlsRequest) (*SignedGsUrlsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignedGsUrls not implemented")
 }
 
 // UnsafeInternalAPIServer may be embedded to opt out of forward compatibility for this service.
@@ -64,20 +64,20 @@ func RegisterInternalAPIServer(s grpc.ServiceRegistrar, srv InternalAPIServer) {
 	s.RegisterService(&InternalAPI_ServiceDesc, srv)
 }
 
-func _InternalAPI_SignedGSURLs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SignedGSURLsRequest)
+func _InternalAPI_SignedGsUrls_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SignedGsUrlsRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(InternalAPIServer).SignedGSURLs(ctx, in)
+		return srv.(InternalAPIServer).SignedGsUrls(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/service.InternalAPI/SignedGSURLs",
+		FullMethod: "/service.InternalAPI/SignedGsUrls",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(InternalAPIServer).SignedGSURLs(ctx, req.(*SignedGSURLsRequest))
+		return srv.(InternalAPIServer).SignedGsUrls(ctx, req.(*SignedGsUrlsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -90,8 +90,8 @@ var InternalAPI_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*InternalAPIServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "SignedGSURLs",
-			Handler:    _InternalAPI_SignedGSURLs_Handler,
+			MethodName: "SignedGsUrls",
+			Handler:    _InternalAPI_SignedGsUrls_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
