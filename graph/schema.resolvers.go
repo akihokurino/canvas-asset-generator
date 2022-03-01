@@ -44,8 +44,9 @@ func (r *queryResolver) Works(ctx context.Context, page int, limit int) (*model.
 		signedVideoURL, _ := r.gcsClient.Signature(videoPath)
 		edges = append(edges, &model.WorkEdge{
 			Node: &model.Work{
-				ID:       entity.ID,
-				VideoUrl: signedVideoURL.String(),
+				ID:          entity.ID,
+				VideoUrl:    signedVideoURL.String(),
+				VideoGsPath: entity.VideoPath,
 			},
 		})
 	}
@@ -74,8 +75,9 @@ func (r *queryResolver) Work(ctx context.Context, id string) (*model.Work, error
 	signedVideoURL, _ := r.gcsClient.Signature(videoPath)
 
 	return &model.Work{
-		ID:       workEntity.ID,
-		VideoUrl: signedVideoURL.String(),
+		ID:          workEntity.ID,
+		VideoUrl:    signedVideoURL.String(),
+		VideoGsPath: workEntity.VideoPath,
 	}, nil
 }
 
@@ -92,9 +94,10 @@ func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*m
 
 		edges = append(edges, &model.ThumbnailEdge{
 			Node: &model.Thumbnail{
-				ID:       entity.ID,
-				WorkID:   entity.WorkID,
-				ImageUrl: signedImageURL.String(),
+				ID:          entity.ID,
+				WorkID:      entity.WorkID,
+				ImageUrl:    signedImageURL.String(),
+				ImageGsPath: entity.ImagePath,
 			},
 		})
 	}
@@ -125,8 +128,9 @@ func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*mo
 	signedVideoURL, _ := r.gcsClient.Signature(videoPath)
 
 	return &model.Work{
-		ID:       workEntity.ID,
-		VideoUrl: signedVideoURL.String(),
+		ID:          workEntity.ID,
+		VideoUrl:    signedVideoURL.String(),
+		VideoGsPath: workEntity.VideoPath,
 	}, nil
 }
 
@@ -144,9 +148,10 @@ func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work) ([]*mode
 		signedImageURL, _ := r.gcsClient.Signature(imagePath)
 
 		resItems = append(resItems, &model.Thumbnail{
-			ID:       entity.ID,
-			WorkID:   entity.WorkID,
-			ImageUrl: signedImageURL.String(),
+			ID:          entity.ID,
+			WorkID:      entity.WorkID,
+			ImageUrl:    signedImageURL.String(),
+			ImageGsPath: entity.ImagePath,
 		})
 	}
 

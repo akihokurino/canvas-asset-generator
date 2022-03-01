@@ -15,6 +15,7 @@ type Mutation {
 type Work {
     id: ID!
     videoUrl: String!
+    videoGsPath: String!
     thumbnails: [Thumbnail!]!
 }
 
@@ -31,6 +32,7 @@ type Thumbnail {
     id: ID!
     workId: ID!
     imageUrl: String!
+    imageGsPath: String!
     work: Work!
 }
 
