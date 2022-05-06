@@ -14,8 +14,11 @@
 - boom（ https://github.com/mercari/datastore ）
 - grpc-web（ https://github.com/improbable-eng/grpc-web ）
 
-## NFT Server
-https://github.com/akihokurino/canvas-nft-server
+## Related
+- https://github.com/akihokurino/canvas-ios
+- https://github.com/akihokurino/canvas-nft-server
+- https://github.com/akihokurino/ethereum-erc721-nft
+- https://github.com/akihokurino/ethereum-erc1155-nft
 
 ## Architecture
 <img width="900" alt="スクリーンショット 2021-11-07 2 04 01" src="https://user-images.githubusercontent.com/2268288/140617843-e45f77d2-7827-44c7-aeb2-7c933363e372.png">
