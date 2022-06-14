@@ -17,8 +17,6 @@
 ## Related
 - https://github.com/akihokurino/canvas-ios
 - https://github.com/akihokurino/canvas-nft-server
-- https://github.com/akihokurino/ethereum-erc721-nft
-- https://github.com/akihokurino/ethereum-erc1155-nft
 
 ## Architecture
 ![frame](https://user-images.githubusercontent.com/2268288/167259508-e5007300-8d7b-40b5-9e63-eea3b913af4c.png)
