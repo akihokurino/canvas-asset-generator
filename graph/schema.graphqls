@@ -16,7 +16,7 @@ type Work {
     id: ID!
     videoUrl: String!
     videoGsPath: String!
-    thumbnails: [Thumbnail!]!
+    thumbnails(limit: Int): [Thumbnail!]!
 }
 
 type WorkEdge {

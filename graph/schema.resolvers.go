@@ -14,6 +14,7 @@ import (
 	"go.mercari.io/datastore/boom"
 )
 
+// RegisterFCMToken is the resolver for the registerFCMToken field.
 func (r *mutationResolver) RegisterFCMToken(ctx context.Context, input model.RegisterFCMToken) (bool, error) {
 	uid := r.contextProvider.MustAuthUID(ctx)
 
@@ -32,6 +33,7 @@ func (r *mutationResolver) RegisterFCMToken(ctx context.Context, input model.Reg
 	return true, nil
 }
 
+// Works is the resolver for the works field.
 func (r *queryResolver) Works(ctx context.Context, page int, limit int) (*model.WorkConnection, error) {
 	workEntities, hasNext, err := r.workRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
 	if err != nil {
@@ -65,6 +67,7 @@ func (r *queryResolver) Works(ctx context.Context, page int, limit int) (*model.
 	}, nil
 }
 
+// Work is the resolver for the work field.
 func (r *queryResolver) Work(ctx context.Context, id string) (*model.Work, error) {
 	workEntity, err := r.workRepo.Get(ctx, id)
 	if err != nil {
@@ -81,6 +84,7 @@ func (r *queryResolver) Work(ctx context.Context, id string) (*model.Work, error
 	}, nil
 }
 
+// Thumbnails is the resolver for the thumbnails field.
 func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*model.ThumbnailConnection, error) {
 	thumbnailEntities, hasNext, err := r.thumbnailRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
 	if err != nil {
@@ -116,6 +120,7 @@ func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*m
 	}, nil
 }
 
+// Work is the resolver for the work field.
 func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*model.Work, error) {
 	workLoader := r.contextProvider.MustWorkDataloader(ctx)
 
@@ -134,12 +139,16 @@ func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*mo
 	}, nil
 }
 
-func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work) ([]*model.Thumbnail, error) {
+// Thumbnails is the resolver for the thumbnails field.
+func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work, limit *int) ([]*model.Thumbnail, error) {
 	thumbnailLoader := r.contextProvider.MustThumbnailDataloader(ctx)
 
 	thumbnailEntities, err := thumbnailLoader.Load(ctx, obj.ID)
 	if err != nil {
 		return nil, err
+	}
+	if limit != nil {
+		thumbnailEntities = thumbnailEntities[0:*limit]
 	}
 
 	resItems := make([]*model.Thumbnail, 0, len(thumbnailEntities))

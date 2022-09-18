@@ -34,3 +34,6 @@ Dockerfile
 firebase.json
 .firebaserc
 grpc/web
+key.p12
+key.pem
+gcp-cred.json

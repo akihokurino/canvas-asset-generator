@@ -11,7 +11,7 @@ import (
 
 func main() {
 	if os.Getenv("IS_LOCAL") == "true" {
-		entrypoint.MustLoadLocalEnv("/app/app.yaml")
+		entrypoint.MustLoadLocalEnv("app.yaml")
 	}
 
 	mux := http.DefaultServeMux

@@ -41,6 +41,7 @@ build:
 run-local:
 	go run cmd/merge_yaml/main.go app.yaml entrypoint/default/app.template.yaml env.yaml
 	docker-compose up
+	# IS_LOCAL=true GOOGLE_APPLICATION_CREDENTIALS=gcp-cred.json go run entrypoint/default/main.go
 
 deploy-gae: vendor gen build
 	go run cmd/merge_yaml/main.go app.yaml entrypoint/default/app.template.yaml env.yaml
