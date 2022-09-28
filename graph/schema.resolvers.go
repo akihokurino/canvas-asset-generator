@@ -112,8 +112,8 @@ func (r *queryResolver) Frames(ctx context.Context, page int, limit int) (*model
 
 	edges := make([]*model.FrameEdge, 0, len(frameEntities))
 	for _, entity := range frameEntities {
-		imagePath, _ := url.Parse(entity.ImagePath)
-		signedImageURL, _ := r.gcsClient.Signature(imagePath)
+		resizedImagePath, _ := url.Parse(entity.ResizedImagePath)
+		signedImageURL, _ := r.gcsClient.Signature(resizedImagePath)
 
 		edges = append(edges, &model.FrameEdge{
 			Node: &model.Frame{
@@ -153,8 +153,8 @@ func (r *workResolver) Frames(ctx context.Context, obj *model.Work, limit *int) 
 
 	resItems := make([]*model.Frame, 0, len(frameEntities))
 	for _, entity := range frameEntities {
-		imagePath, _ := url.Parse(entity.ImagePath)
-		signedImageURL, _ := r.gcsClient.Signature(imagePath)
+		resizedImagePath, _ := url.Parse(entity.ResizedImagePath)
+		signedImageURL, _ := r.gcsClient.Signature(resizedImagePath)
 
 		resItems = append(resItems, &model.Frame{
 			ID:          entity.ID,

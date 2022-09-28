@@ -1,6 +1,7 @@
 package frame
 
 import (
+	"net/url"
 	"time"
 
 	"github.com/google/uuid"
@@ -18,12 +19,13 @@ type Entity struct {
 	CreatedAt        time.Time
 }
 
-func NewEntity(workID string, imagePath string, order int, now time.Time) *Entity {
+func NewEntity(workID string, imagePath *url.URL, resizedImagePath *url.URL, order int, now time.Time) *Entity {
 	return &Entity{
-		ID:        uuid.New().String(),
-		WorkID:    workID,
-		ImagePath: imagePath,
-		Order:     order,
-		CreatedAt: now,
+		ID:               uuid.New().String(),
+		WorkID:           workID,
+		ImagePath:        imagePath.String(),
+		ResizedImagePath: resizedImagePath.String(),
+		Order:            order,
+		CreatedAt:        now,
 	}
 }

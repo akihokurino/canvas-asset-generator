@@ -33,6 +33,7 @@ var providerSet = wire.NewSet(
 	subscriber.NewServer,
 	provideSubscriberAuthenticate,
 	batch.NewExportCSV,
+	batch.NewResizeFrame,
 	batch.NewServer,
 	graph.NewResolver,
 	graph.NewServer,

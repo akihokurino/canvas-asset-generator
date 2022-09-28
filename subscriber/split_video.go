@@ -23,6 +23,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/image/draw"
+
 	"go.mercari.io/datastore/boom"
 	"golang.org/x/sync/errgroup"
 
@@ -112,23 +114,42 @@ func NewSplitVideo(
 				image.Rect(0, 300, imgSource.Bounds().Dx(), imgSource.Bounds().Dy()-300),
 			)
 
-			buf := bytes.NewBuffer(nil)
-			if err := jpeg.Encode(buf, subImage, &jpeg.Options{Quality: 100}); err != nil {
+			rect := subImage.Bounds()
+			resizedImage := image.NewRGBA(image.Rect(0, 0, rect.Dx()/5, rect.Dy()/5))
+			draw.CatmullRom.Scale(resizedImage, resizedImage.Bounds(), subImage, rect, draw.Over, nil)
+
+			orgBuf := bytes.NewBuffer(nil)
+			if err := jpeg.Encode(orgBuf, subImage, &jpeg.Options{Quality: 100}); err != nil {
 				return errors.WithStack(err)
 			}
 
-			u, err := gcsClient.Save(
+			orgURL, err := gcsClient.Save(
 				ctx,
 				config.FrameBucketName,
 				fmt.Sprintf("%s/%d", videoName, i),
-				buf.Bytes(),
-				"frame/jpeg")
+				orgBuf.Bytes(),
+				"image/jpeg")
 			if err != nil {
 				return errors.WithStack(err)
 			}
 
-			log.Printf("splited frame url %s", u.String())
-			frameEntities = append(frameEntities, frame.NewEntity(workEntity.ID, u.String(), i, now))
+			resizedBuf := bytes.NewBuffer(nil)
+			if err := jpeg.Encode(resizedBuf, resizedImage, &jpeg.Options{Quality: 80}); err != nil {
+				return errors.WithStack(err)
+			}
+
+			resizedURL, err := gcsClient.Save(
+				ctx,
+				config.FrameBucketName,
+				fmt.Sprintf("%s/%d/resized", videoName, i),
+				resizedBuf.Bytes(),
+				"image/jpeg")
+			if err != nil {
+				return errors.WithStack(err)
+			}
+
+			log.Printf("splited frame url %s", orgURL.String())
+			frameEntities = append(frameEntities, frame.NewEntity(workEntity.ID, orgURL, resizedURL, i, now))
 		}
 
 		currentFrameEntities, err := frameRepo.GetAllByWork(ctx, workEntity.ID)

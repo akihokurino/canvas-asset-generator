@@ -17,6 +17,7 @@ require (
 	github.com/u2takey/ffmpeg-go v0.3.0
 	github.com/vektah/gqlparser/v2 v2.5.1
 	go.mercari.io/datastore v1.8.0
+	golang.org/x/image v0.0.0-20191009234506-e7c1f5e7dbb8
 	golang.org/x/net v0.0.0-20211020060615-d418f374d309 // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	google.golang.org/api v0.58.0
