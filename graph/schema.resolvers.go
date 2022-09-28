@@ -9,6 +9,7 @@ import (
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
 	"context"
+	"fmt"
 	"net/url"
 
 	"go.mercari.io/datastore/boom"
@@ -112,15 +113,19 @@ func (r *queryResolver) Frames(ctx context.Context, page int, limit int) (*model
 
 	edges := make([]*model.FrameEdge, 0, len(frameEntities))
 	for _, entity := range frameEntities {
+		orgImagePath, _ := url.Parse(entity.ImagePath)
+		orgSignedImageURL, _ := r.gcsClient.Signature(orgImagePath)
+
 		resizedImagePath, _ := url.Parse(entity.ResizedImagePath)
-		signedImageURL, _ := r.gcsClient.Signature(resizedImagePath)
+		resizedSignedImageURL, _ := r.gcsClient.Signature(resizedImagePath)
 
 		edges = append(edges, &model.FrameEdge{
 			Node: &model.Frame{
-				ID:          entity.ID,
-				WorkID:      entity.WorkID,
-				ImageUrl:    signedImageURL.String(),
-				ImageGsPath: entity.ImagePath,
+				ID:              entity.ID,
+				WorkID:          entity.WorkID,
+				OrgImageUrl:     orgSignedImageURL.String(),
+				ResizedImageUrl: resizedSignedImageURL.String(),
+				ImageGsPath:     entity.ImagePath,
 			},
 		})
 	}
@@ -153,14 +158,18 @@ func (r *workResolver) Frames(ctx context.Context, obj *model.Work, limit *int) 
 
 	resItems := make([]*model.Frame, 0, len(frameEntities))
 	for _, entity := range frameEntities {
+		orgImagePath, _ := url.Parse(entity.ImagePath)
+		orgSignedImageURL, _ := r.gcsClient.Signature(orgImagePath)
+
 		resizedImagePath, _ := url.Parse(entity.ResizedImagePath)
-		signedImageURL, _ := r.gcsClient.Signature(resizedImagePath)
+		resizedSignedImageURL, _ := r.gcsClient.Signature(resizedImagePath)
 
 		resItems = append(resItems, &model.Frame{
-			ID:          entity.ID,
-			WorkID:      entity.WorkID,
-			ImageUrl:    signedImageURL.String(),
-			ImageGsPath: entity.ImagePath,
+			ID:              entity.ID,
+			WorkID:          entity.WorkID,
+			OrgImageUrl:     orgSignedImageURL.String(),
+			ResizedImageUrl: resizedSignedImageURL.String(),
+			ImageGsPath:     entity.ImagePath,
 		})
 	}
 
@@ -183,3 +192,19 @@ type frameResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type workResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+func (r *frameResolver) OrgImageURL(ctx context.Context, obj *model.Frame) (string, error) {
+	panic(fmt.Errorf("not implemented: OrgImageURL - orgImageUrl"))
+}
+func (r *frameResolver) ResizedImageURL(ctx context.Context, obj *model.Frame) (string, error) {
+	panic(fmt.Errorf("not implemented: ResizedImageURL - resizedImageUrl"))
+}
+func (r *frameResolver) ImageGsPath(ctx context.Context, obj *model.Frame) (string, error) {
+	panic(fmt.Errorf("not implemented: ImageGsPath - imageGsPath"))
+}

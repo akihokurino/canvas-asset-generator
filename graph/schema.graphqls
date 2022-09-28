@@ -31,7 +31,8 @@ type WorkConnection {
 type Frame {
     id: ID!
     workId: ID!
-    imageUrl: String!
+    orgImageUrl: String!
+    resizedImageUrl: String!
     imageGsPath: String!
     work: Work!
 }
