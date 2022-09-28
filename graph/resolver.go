@@ -4,7 +4,7 @@ import (
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
-	"canvas-server/infra/datastore/thumbnail"
+	"canvas-server/infra/datastore/frame"
 	"canvas-server/infra/datastore/work"
 	"canvas-server/infra/firebase"
 )
@@ -19,7 +19,7 @@ type Resolver struct {
 	gcsClient       cloud_storage.Client
 	transaction     datastore.Transaction
 	workRepo        work.Repository
-	thumbnailRepo   thumbnail.Repository
+	frameRepo       frame.Repository
 	fcmTokenRepo    fcm_token.Repository
 }
 
@@ -29,7 +29,7 @@ func NewResolver(
 	gcsClient cloud_storage.Client,
 	transaction datastore.Transaction,
 	workRepo work.Repository,
-	thumbnailRepo thumbnail.Repository,
+	frameRepo frame.Repository,
 	fcmTokenRepo fcm_token.Repository) *Resolver {
 	return &Resolver{
 		contextProvider: contextProvider,
@@ -37,7 +37,7 @@ func NewResolver(
 		gcsClient:       gcsClient,
 		transaction:     transaction,
 		workRepo:        workRepo,
-		thumbnailRepo:   thumbnailRepo,
+		frameRepo:       frameRepo,
 		fcmTokenRepo:    fcmTokenRepo,
 	}
 }

@@ -14,6 +14,25 @@ import (
 	"go.mercari.io/datastore/boom"
 )
 
+// Work is the resolver for the work field.
+func (r *frameResolver) Work(ctx context.Context, obj *model.Frame) (*model.Work, error) {
+	workLoader := r.contextProvider.MustWorkDataloader(ctx)
+
+	workEntity, err := workLoader.Load(ctx, obj.WorkID)
+	if err != nil {
+		return nil, err
+	}
+
+	videoPath, _ := url.Parse(workEntity.VideoPath)
+	signedVideoURL, _ := r.gcsClient.Signature(videoPath)
+
+	return &model.Work{
+		ID:          workEntity.ID,
+		VideoUrl:    signedVideoURL.String(),
+		VideoGsPath: workEntity.VideoPath,
+	}, nil
+}
+
 // RegisterFCMToken is the resolver for the registerFCMToken field.
 func (r *mutationResolver) RegisterFCMToken(ctx context.Context, input model.RegisterFCMToken) (bool, error) {
 	uid := r.contextProvider.MustAuthUID(ctx)
@@ -84,20 +103,20 @@ func (r *queryResolver) Work(ctx context.Context, id string) (*model.Work, error
 	}, nil
 }
 
-// Thumbnails is the resolver for the thumbnails field.
-func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*model.ThumbnailConnection, error) {
-	thumbnailEntities, hasNext, err := r.thumbnailRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
+// Frames is the resolver for the frames field.
+func (r *queryResolver) Frames(ctx context.Context, page int, limit int) (*model.FrameConnection, error) {
+	frameEntities, hasNext, err := r.frameRepo.GetWithPager(ctx, datastore.NewPager(page, limit))
 	if err != nil {
 		return nil, err
 	}
 
-	edges := make([]*model.ThumbnailEdge, 0, len(thumbnailEntities))
-	for _, entity := range thumbnailEntities {
+	edges := make([]*model.FrameEdge, 0, len(frameEntities))
+	for _, entity := range frameEntities {
 		imagePath, _ := url.Parse(entity.ImagePath)
 		signedImageURL, _ := r.gcsClient.Signature(imagePath)
 
-		edges = append(edges, &model.ThumbnailEdge{
-			Node: &model.Thumbnail{
+		edges = append(edges, &model.FrameEdge{
+			Node: &model.Frame{
 				ID:          entity.ID,
 				WorkID:      entity.WorkID,
 				ImageUrl:    signedImageURL.String(),
@@ -106,12 +125,12 @@ func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*m
 		})
 	}
 
-	count, err := r.thumbnailRepo.GetTotalCount(ctx)
+	count, err := r.frameRepo.GetTotalCount(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return &model.ThumbnailConnection{
+	return &model.FrameConnection{
 		Edges: edges,
 		PageInfo: &model.PageInfo{
 			TotalCount:  int(count),
@@ -120,43 +139,24 @@ func (r *queryResolver) Thumbnails(ctx context.Context, page int, limit int) (*m
 	}, nil
 }
 
-// Work is the resolver for the work field.
-func (r *thumbnailResolver) Work(ctx context.Context, obj *model.Thumbnail) (*model.Work, error) {
-	workLoader := r.contextProvider.MustWorkDataloader(ctx)
+// Frames is the resolver for the frames field.
+func (r *workResolver) Frames(ctx context.Context, obj *model.Work, limit *int) ([]*model.Frame, error) {
+	frameLoader := r.contextProvider.MustFrameDataloader(ctx)
 
-	workEntity, err := workLoader.Load(ctx, obj.WorkID)
-	if err != nil {
-		return nil, err
-	}
-
-	videoPath, _ := url.Parse(workEntity.VideoPath)
-	signedVideoURL, _ := r.gcsClient.Signature(videoPath)
-
-	return &model.Work{
-		ID:          workEntity.ID,
-		VideoUrl:    signedVideoURL.String(),
-		VideoGsPath: workEntity.VideoPath,
-	}, nil
-}
-
-// Thumbnails is the resolver for the thumbnails field.
-func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work, limit *int) ([]*model.Thumbnail, error) {
-	thumbnailLoader := r.contextProvider.MustThumbnailDataloader(ctx)
-
-	thumbnailEntities, err := thumbnailLoader.Load(ctx, obj.ID)
+	frameEntities, err := frameLoader.Load(ctx, obj.ID)
 	if err != nil {
 		return nil, err
 	}
 	if limit != nil {
-		thumbnailEntities = thumbnailEntities[0:*limit]
+		frameEntities = frameEntities[0:*limit]
 	}
 
-	resItems := make([]*model.Thumbnail, 0, len(thumbnailEntities))
-	for _, entity := range thumbnailEntities {
+	resItems := make([]*model.Frame, 0, len(frameEntities))
+	for _, entity := range frameEntities {
 		imagePath, _ := url.Parse(entity.ImagePath)
 		signedImageURL, _ := r.gcsClient.Signature(imagePath)
 
-		resItems = append(resItems, &model.Thumbnail{
+		resItems = append(resItems, &model.Frame{
 			ID:          entity.ID,
 			WorkID:      entity.WorkID,
 			ImageUrl:    signedImageURL.String(),
@@ -167,19 +167,19 @@ func (r *workResolver) Thumbnails(ctx context.Context, obj *model.Work, limit *i
 	return resItems, nil
 }
 
+// Frame returns generated.FrameResolver implementation.
+func (r *Resolver) Frame() generated.FrameResolver { return &frameResolver{r} }
+
 // Mutation returns generated.MutationResolver implementation.
 func (r *Resolver) Mutation() generated.MutationResolver { return &mutationResolver{r} }
 
 // Query returns generated.QueryResolver implementation.
 func (r *Resolver) Query() generated.QueryResolver { return &queryResolver{r} }
 
-// Thumbnail returns generated.ThumbnailResolver implementation.
-func (r *Resolver) Thumbnail() generated.ThumbnailResolver { return &thumbnailResolver{r} }
-
 // Work returns generated.WorkResolver implementation.
 func (r *Resolver) Work() generated.WorkResolver { return &workResolver{r} }
 
+type frameResolver struct{ *Resolver }
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type thumbnailResolver struct{ *Resolver }
 type workResolver struct{ *Resolver }

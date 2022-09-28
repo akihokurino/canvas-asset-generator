@@ -1,4 +1,4 @@
-package usecase
+package subscriber
 
 import (
 	"bufio"
@@ -7,17 +7,19 @@ import (
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
-	"canvas-server/infra/datastore/thumbnail"
+	"canvas-server/infra/datastore/frame"
 	"canvas-server/infra/datastore/work"
 	"canvas-server/infra/ffmpeg"
 	"canvas-server/infra/firebase"
 	"context"
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/jpeg"
 	"io/ioutil"
 	"log"
 	"math"
+	"net/http"
 	"strings"
 	"time"
 
@@ -31,7 +33,7 @@ type SubImager interface {
 	SubImage(r image.Rectangle) image.Image
 }
 
-type SplitVideo func(ctx context.Context, path string) error
+type SplitVideo func(w http.ResponseWriter, r *http.Request)
 
 func NewSplitVideo(
 	gcsClient cloud_storage.Client,
@@ -39,9 +41,9 @@ func NewSplitVideo(
 	fireClient firebase.Client,
 	tx datastore.Transaction,
 	workRepo work.Repository,
-	thumbnailRepo thumbnail.Repository,
+	frameRepo frame.Repository,
 	fcmTokenRepo fcm_token.Repository) SplitVideo {
-	return func(ctx context.Context, path string) error {
+	split := func(ctx context.Context, path string) error {
 		now := time.Now()
 		videoName := strings.Replace(path, ".mp4", "", -1)
 
@@ -65,16 +67,16 @@ func NewSplitVideo(
 			return errors.WithStack(err)
 		}
 
-		log.Printf("---------- delete current thumbnails ----------")
+		log.Printf("---------- delete current frames ----------")
 
-		currents, err := gcsClient.List(ctx, config.ThumbnailBucketName, videoName)
+		currents, err := gcsClient.List(ctx, config.FrameBucketName, videoName)
 		if err != nil {
 			return errors.WithStack(err)
 		}
 
 		for _, current := range currents {
-			log.Printf("deleted thumbnail path = %s", current)
-			if err := gcsClient.Delete(ctx, config.ThumbnailBucketName, current); err != nil {
+			log.Printf("deleted frame path = %s", current)
+			if err := gcsClient.Delete(ctx, config.FrameBucketName, current); err != nil {
 				return errors.WithStack(err)
 			}
 		}
@@ -91,7 +93,7 @@ func NewSplitVideo(
 		log.Printf("total second %d", totalSecond)
 
 		workEntity := work.NewEntity(videoName, gcsClient.FullPath(config.VideoBucketName, path), now)
-		thumbnailEntities := make([]*thumbnail.Entity, 0)
+		frameEntities := make([]*frame.Entity, 0)
 
 		for i := 0; i < totalSecond; i++ {
 			log.Printf("---------- split video of %d ----------", i)
@@ -117,19 +119,19 @@ func NewSplitVideo(
 
 			u, err := gcsClient.Save(
 				ctx,
-				config.ThumbnailBucketName,
+				config.FrameBucketName,
 				fmt.Sprintf("%s/%d", videoName, i),
 				buf.Bytes(),
-				"image/jpeg")
+				"frame/jpeg")
 			if err != nil {
 				return errors.WithStack(err)
 			}
 
-			log.Printf("splited thumbnail url %s", u.String())
-			thumbnailEntities = append(thumbnailEntities, thumbnail.NewEntity(workEntity.ID, u.String(), i, now))
+			log.Printf("splited frame url %s", u.String())
+			frameEntities = append(frameEntities, frame.NewEntity(workEntity.ID, u.String(), i, now))
 		}
 
-		currentThumbnailEntities, err := thumbnailRepo.GetAllByWork(ctx, workEntity.ID)
+		currentFrameEntities, err := frameRepo.GetAllByWork(ctx, workEntity.ID)
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -138,11 +140,11 @@ func NewSplitVideo(
 
 		eg := errgroup.Group{}
 
-		for i := range currentThumbnailEntities {
-			e := currentThumbnailEntities[i]
+		for i := range currentFrameEntities {
+			e := currentFrameEntities[i]
 			eg.Go(func() error {
 				return tx(ctx, func(tx *boom.Transaction) error {
-					return thumbnailRepo.Delete(tx, e.ID)
+					return frameRepo.Delete(tx, e.ID)
 				})
 			})
 		}
@@ -153,11 +155,11 @@ func NewSplitVideo(
 			})
 		})
 
-		for i := range thumbnailEntities {
-			e := thumbnailEntities[i]
+		for i := range frameEntities {
+			e := frameEntities[i]
 			eg.Go(func() error {
 				return tx(ctx, func(tx *boom.Transaction) error {
-					return thumbnailRepo.Put(tx, e)
+					return frameRepo.Put(tx, e)
 				})
 			})
 		}
@@ -174,7 +176,7 @@ func NewSplitVideo(
 			return nil
 		}
 
-		pushBody := fmt.Sprintf("%sのサムネイルの生成が完了しました", workEntity.ID)
+		pushBody := fmt.Sprintf("%sのフレームの生成が完了しました", workEntity.ID)
 		for _, token := range tokens {
 			if err := fireClient.SendPushNotification(ctx, token.Token, "", pushBody, 0, map[string]string{}, func(t string) {
 				_ = tx(ctx, func(tx *boom.Transaction) error {
@@ -186,5 +188,35 @@ func NewSplitVideo(
 		}
 
 		return nil
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+
+		type Payload struct {
+			Path string `json:"path"`
+		}
+
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			log.Printf("ReadAll: %v", err)
+			http.Error(w, "Internal Error, cannot read body", http.StatusInternalServerError)
+			return
+		}
+
+		var payload Payload
+		if err := json.Unmarshal(body, &payload); err != nil {
+			log.Printf("Unmarshal: %v", err)
+			http.Error(w, "Internal Error, cannot parse json body", http.StatusInternalServerError)
+			return
+		}
+
+		if err := split(ctx, payload.Path); err != nil {
+			log.Printf("SplitVideo: %v", err)
+			http.Error(w, "Internal Error, cannot split video", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 }

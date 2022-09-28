@@ -1,6 +1,5 @@
 indexes:
-
-- kind: Thumbnail
+- kind: Frame
   properties:
   - name: WorkID
   - name: Order

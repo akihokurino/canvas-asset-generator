@@ -49,11 +49,13 @@ deploy-gae: vendor gen build
 	go run cmd/merge_yaml/main.go app.yaml entrypoint/grpc/app.template.yaml env.yaml
 	gcloud app deploy --quiet --version 1 --project canvas-329810 app.yaml
 
-deploy-index:
+deploy-config:
 	gcloud app deploy --quiet --project canvas-329810 index.yaml
-
-deploy-cron:
 	gcloud app deploy --quiet --project canvas-329810 cron.yaml
+	gcloud app deploy --quiet --project canvas-329810 queue.yaml
+
+clean-index:
+	gcloud datastore indexes cleanup --quiet --project canvas-329810 index.yaml
 
 deploy-functions:
 	firebase deploy --only functions

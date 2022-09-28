@@ -1,12 +1,11 @@
-package thumbnail
+package frame
 
 import (
 	"canvas-server/infra/datastore"
 	"context"
 
-	w "go.mercari.io/datastore"
-
 	"github.com/pkg/errors"
+	w "go.mercari.io/datastore"
 	"go.mercari.io/datastore/boom"
 )
 
@@ -14,6 +13,7 @@ type Repository interface {
 	GetAll(ctx context.Context) ([]*Entity, error)
 	GetWithPager(ctx context.Context, pager *datastore.Pager) ([]*Entity, bool, error)
 	GetAllByWork(ctx context.Context, workID string) ([]*Entity, error)
+	GetAllByNotResized(ctx context.Context) ([]*Entity, error)
 	GetMulti(ctx context.Context, ids []string) ([]*Entity, error)
 	GetTotalCount(ctx context.Context) (int64, error)
 	Put(tx *boom.Transaction, item *Entity) error
@@ -75,6 +75,19 @@ func (r *repository) GetAllByWork(ctx context.Context, workID string) ([]*Entity
 	q := b.Client.NewQuery(kind).
 		Filter("WorkID =", workID).
 		Order("Order")
+
+	var entities []*Entity
+	if _, err := b.GetAll(q, &entities); err != nil {
+		return nil, errors.WithStack(err)
+	}
+
+	return entities, nil
+}
+
+func (r *repository) GetAllByNotResized(ctx context.Context) ([]*Entity, error) {
+	b := boom.FromClient(ctx, r.df(ctx))
+	q := b.Client.NewQuery(kind).
+		Filter("ResizedImagePath =", "")
 
 	var entities []*Entity
 	if _, err := b.GetAll(q, &entities); err != nil {

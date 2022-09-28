@@ -7,15 +7,15 @@ import (
 )
 
 const authUidStoreKey = "__auth_uid_store_key__"
-const thumbnailDataLoaderStoreKey = "__thumbnail_dataloader_store_key__"
+const frameDataLoaderStoreKey = "__frame_dataloader_store_key__"
 const workDataLoaderStoreKey = "__work_dataloader_store_key__"
 
 type ContextProvider interface {
 	WithAuthUID(ctx context.Context, uid firebase.UID) context.Context
 	MustAuthUID(ctx context.Context) firebase.UID
 
-	WithThumbnailDataloader(ctx context.Context, loader *dataloader.ThumbnailLoader) context.Context
-	MustThumbnailDataloader(ctx context.Context) *dataloader.ThumbnailLoader
+	WithFrameDataloader(ctx context.Context, loader *dataloader.FrameLoader) context.Context
+	MustFrameDataloader(ctx context.Context) *dataloader.FrameLoader
 
 	WithWorkDataloader(ctx context.Context, loader *dataloader.WorkLoader) context.Context
 	MustWorkDataloader(ctx context.Context) *dataloader.WorkLoader
@@ -40,14 +40,14 @@ func (u *contextProvider) MustAuthUID(ctx context.Context) firebase.UID {
 	return v
 }
 
-func (u *contextProvider) WithThumbnailDataloader(ctx context.Context, loader *dataloader.ThumbnailLoader) context.Context {
-	return context.WithValue(ctx, thumbnailDataLoaderStoreKey, loader)
+func (u *contextProvider) WithFrameDataloader(ctx context.Context, loader *dataloader.FrameLoader) context.Context {
+	return context.WithValue(ctx, frameDataLoaderStoreKey, loader)
 }
 
-func (u *contextProvider) MustThumbnailDataloader(ctx context.Context) *dataloader.ThumbnailLoader {
-	v, ok := ctx.Value(thumbnailDataLoaderStoreKey).(*dataloader.ThumbnailLoader)
+func (u *contextProvider) MustFrameDataloader(ctx context.Context) *dataloader.FrameLoader {
+	v, ok := ctx.Value(frameDataLoaderStoreKey).(*dataloader.FrameLoader)
 	if !ok {
-		panic("not found thumbnail dataloader")
+		panic("not found frame dataloader")
 	}
 	return v
 }

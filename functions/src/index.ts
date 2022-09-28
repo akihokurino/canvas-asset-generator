@@ -3,12 +3,10 @@ const { CloudTasksClient } = require("@google-cloud/tasks");
 
 const projectId = "canvas-329810";
 const location = "asia-northeast1";
-const queue = "video-split-task";
 
 exports.queuingVideoSplitTask = functions
   .region(location)
-  .storage
-  .bucket("canvas-329810-video")
+  .storage.bucket("canvas-329810-video")
   .object()
   .onFinalize(async (object: functions.storage.ObjectMetadata) => {
     const filePath = object.name || "";
@@ -22,9 +20,8 @@ exports.queuingVideoSplitTask = functions
     console.log(`ファイルパス ${filePath}`);
 
     const tasksClient = new CloudTasksClient();
-    const queuePath = tasksClient.queuePath(projectId, location, queue);
-
-    const url = "https://canvas-329810.an.r.appspot.com/video_split";
+    const queuePath = tasksClient.queuePath(projectId, location, "split-video");
+    const url = "https://canvas-329810.an.r.appspot.com/split-video";
     const delaySeconds = 1;
 
     const payload = {
@@ -38,7 +35,7 @@ exports.queuingVideoSplitTask = functions
         body: Buffer.from(JSON.stringify(payload)).toString("base64"),
         headers: {
           "Content-Type": "application/json",
-          "Authorization": functions.config().token.internal,
+          Authorization: functions.config().token.internal,
         },
       },
       scheduleTime: {

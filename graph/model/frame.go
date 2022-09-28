@@ -1,6 +1,6 @@
 package model
 
-type Thumbnail struct {
+type Frame struct {
 	ID          string `json:"id"`
 	WorkID      string `json:"workId"`
 	ImageUrl    string `json:"imagePath"`

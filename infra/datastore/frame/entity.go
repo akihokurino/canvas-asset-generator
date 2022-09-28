@@ -1,4 +1,4 @@
-package thumbnail
+package frame
 
 import (
 	"time"
@@ -6,15 +6,16 @@ import (
 	"github.com/google/uuid"
 )
 
-const kind = "Thumbnail"
+const kind = "Frame"
 
 type Entity struct {
-	_kind     string `boom:"kind,Thumbnail"`
-	ID        string `boom:"id"`
-	WorkID    string
-	ImagePath string
-	Order     int
-	CreatedAt time.Time
+	_kind            string `boom:"kind,Frame"`
+	ID               string `boom:"id"`
+	WorkID           string
+	ImagePath        string
+	ResizedImagePath string
+	Order            int
+	CreatedAt        time.Time
 }
 
 func NewEntity(workID string, imagePath string, order int, now time.Time) *Entity {

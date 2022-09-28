@@ -1,3 +1,4 @@
+//go:build wireinject
 // +build wireinject
 
 package di
@@ -9,12 +10,11 @@ import (
 	"canvas-server/infra/cloud_storage"
 	"canvas-server/infra/datastore"
 	"canvas-server/infra/datastore/fcm_token"
-	"canvas-server/infra/datastore/thumbnail"
+	"canvas-server/infra/datastore/frame"
 	"canvas-server/infra/datastore/work"
 	"canvas-server/infra/ffmpeg"
 	"canvas-server/infra/firebase"
 	"canvas-server/subscriber"
-	"canvas-server/usecase"
 	"os"
 
 	"github.com/google/wire"
@@ -26,12 +26,13 @@ var providerSet = wire.NewSet(
 	provideDSFactory,
 	datastore.NewTransaction,
 	work.NewRepository,
-	thumbnail.NewRepository,
+	frame.NewRepository,
 	fcm_token.NewRepository,
 	ffmpeg.NewClient,
-	usecase.NewSplitVideo,
+	subscriber.NewSplitVideo,
 	subscriber.NewServer,
 	provideSubscriberAuthenticate,
+	batch.NewExportCSV,
 	batch.NewServer,
 	graph.NewResolver,
 	graph.NewServer,
