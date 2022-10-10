@@ -38,7 +38,7 @@ var providerSet = wire.NewSet(
 	graph.NewResolver,
 	graph.NewServer,
 	graph.NewContextProvider,
-	graph.NewAuthenticate,
+	provideAPIAuthenticate,
 	graph.NewDataloader,
 	graph.NewCROS,
 	grpc.NewAPI,
@@ -58,6 +58,12 @@ func provideDSFactory() datastore.DSFactory {
 
 func provideSubscriberAuthenticate() subscriber.Authenticate {
 	return subscriber.NewAuthenticate(os.Getenv("INTERNAL_TOKEN"))
+}
+
+func provideAPIAuthenticate(
+	contextProvider graph.ContextProvider,
+	fireClient firebase.Client) graph.Authenticate {
+	return graph.NewAuthenticate(os.Getenv("INTERNAL_TOKEN"), contextProvider, fireClient)
 }
 
 func provideGRPCAuthenticate() grpc.Authenticate {
