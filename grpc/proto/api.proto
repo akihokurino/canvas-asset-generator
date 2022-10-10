@@ -4,6 +4,7 @@ package service;
 
 service InternalAPI {
   rpc SignedGsUrls (SignedGsUrlsRequest) returns (SignedGsUrlsResponse);
+  rpc SendPush (SendPushRequest) returns (SendPushResponse);
 }
 
 message SignedGsUrlsRequest {
@@ -12,4 +13,12 @@ message SignedGsUrlsRequest {
 
 message SignedGsUrlsResponse {
   repeated string urls = 1;
+}
+
+message SendPushRequest {
+  string text = 1;
+}
+
+message SendPushResponse {
+
 }

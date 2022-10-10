@@ -3,10 +3,15 @@ package grpc
 import (
 	pb "canvas-server/grpc/proto/go"
 	"canvas-server/infra/cloud_storage"
+	"canvas-server/infra/datastore"
+	"canvas-server/infra/datastore/fcm_token"
+	"canvas-server/infra/firebase"
 	"context"
 	"log"
 	"net/http"
 	"net/url"
+
+	"go.mercari.io/datastore/boom"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
@@ -59,12 +64,22 @@ func applyMiddleware(target http.Handler, handlers ...func(http.Handler) http.Ha
 }
 
 type api struct {
-	gcsClient cloud_storage.Client
+	gcsClient    cloud_storage.Client
+	fireClient   firebase.Client
+	tx           datastore.Transaction
+	fcmTokenRepo fcm_token.Repository
 }
 
-func NewAPI(gcsClient cloud_storage.Client) pb.InternalAPIServer {
+func NewAPI(
+	gcsClient cloud_storage.Client,
+	fireClient firebase.Client,
+	tx datastore.Transaction,
+	fcmTokenRepo fcm_token.Repository) pb.InternalAPIServer {
 	return &api{
-		gcsClient: gcsClient,
+		gcsClient:    gcsClient,
+		fireClient:   fireClient,
+		tx:           tx,
+		fcmTokenRepo: fcmTokenRepo,
 	}
 }
 
@@ -80,4 +95,23 @@ func (a *api) SignedGsUrls(ctx context.Context, req *pb.SignedGsUrlsRequest) (*p
 	return &pb.SignedGsUrlsResponse{
 		Urls: results,
 	}, nil
+}
+
+func (a *api) SendPush(ctx context.Context, req *pb.SendPushRequest) (*pb.SendPushResponse, error) {
+	tokens, err := a.fcmTokenRepo.GetAll(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, token := range tokens {
+		if err := a.fireClient.SendPushNotification(ctx, token.Token, "", req.Text, 0, map[string]string{}, func(t string) {
+			_ = a.tx(ctx, func(tx *boom.Transaction) error {
+				return a.fcmTokenRepo.Delete(tx, token.ID)
+			})
+		}); err != nil {
+			log.Printf("failed send push, %+v", err)
+		}
+	}
+
+	return &pb.SendPushResponse{}, nil
 }

@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type InternalAPIClient interface {
 	SignedGsUrls(ctx context.Context, in *SignedGsUrlsRequest, opts ...grpc.CallOption) (*SignedGsUrlsResponse, error)
+	SendPush(ctx context.Context, in *SendPushRequest, opts ...grpc.CallOption) (*SendPushResponse, error)
 }
 
 type internalAPIClient struct {
@@ -38,11 +39,21 @@ func (c *internalAPIClient) SignedGsUrls(ctx context.Context, in *SignedGsUrlsRe
 	return out, nil
 }
 
+func (c *internalAPIClient) SendPush(ctx context.Context, in *SendPushRequest, opts ...grpc.CallOption) (*SendPushResponse, error) {
+	out := new(SendPushResponse)
+	err := c.cc.Invoke(ctx, "/service.InternalAPI/SendPush", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // InternalAPIServer is the server API for InternalAPI service.
 // All implementations should embed UnimplementedInternalAPIServer
 // for forward compatibility
 type InternalAPIServer interface {
 	SignedGsUrls(context.Context, *SignedGsUrlsRequest) (*SignedGsUrlsResponse, error)
+	SendPush(context.Context, *SendPushRequest) (*SendPushResponse, error)
 }
 
 // UnimplementedInternalAPIServer should be embedded to have forward compatible implementations.
@@ -51,6 +62,9 @@ type UnimplementedInternalAPIServer struct {
 
 func (UnimplementedInternalAPIServer) SignedGsUrls(context.Context, *SignedGsUrlsRequest) (*SignedGsUrlsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SignedGsUrls not implemented")
+}
+func (UnimplementedInternalAPIServer) SendPush(context.Context, *SendPushRequest) (*SendPushResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SendPush not implemented")
 }
 
 // UnsafeInternalAPIServer may be embedded to opt out of forward compatibility for this service.
@@ -82,6 +96,24 @@ func _InternalAPI_SignedGsUrls_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _InternalAPI_SendPush_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SendPushRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(InternalAPIServer).SendPush(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.InternalAPI/SendPush",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(InternalAPIServer).SendPush(ctx, req.(*SendPushRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // InternalAPI_ServiceDesc is the grpc.ServiceDesc for InternalAPI service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -92,6 +124,10 @@ var InternalAPI_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SignedGsUrls",
 			Handler:    _InternalAPI_SignedGsUrls_Handler,
+		},
+		{
+			MethodName: "SendPush",
+			Handler:    _InternalAPI_SendPush_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
