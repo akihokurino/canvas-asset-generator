@@ -1,8 +1,8 @@
 package main
 
 import (
-	"canvas-server/di"
-	"canvas-server/entrypoint"
+	"canvas-asset-generator/di"
+	"canvas-asset-generator/entrypoint"
 	"fmt"
 	"log"
 	"net/http"

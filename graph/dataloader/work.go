@@ -1,7 +1,7 @@
 package dataloader
 
 import (
-	"canvas-server/infra/datastore/work"
+	"canvas-asset-generator/infra/datastore/work"
 	"context"
 
 	"github.com/pkg/errors"

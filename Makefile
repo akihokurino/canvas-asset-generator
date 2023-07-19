@@ -1,5 +1,6 @@
 MAKEFLAGS=--no-builtin-rules --no-builtin-variables --always-make
 ROOT := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
+BIN_DIR:=$(ROOT)/bin
 
 INTERNAL_TOKEN := ""
 GO_DIST := grpc/proto/go
@@ -10,9 +11,12 @@ vendor:
 	go mod tidy
 
 gen:
-	gqlgen
+	@$(BIN_DIR)/gqlgen
 	cp di/wire_gen.default.go di/wire_gen.go
 	go generate di/wire_gen.go
+
+gen-wire:
+	cd di && $(BIN_DIR)/wire
 
 gen-proto:
 	mkdir -p $(GO_DIST)
@@ -66,3 +70,7 @@ deploy-functions-env:
 gen-gcp-credential-pem:
 	openssl pkcs12 -in key.p12 -passin pass:notasecret -out key.pem -nodes
 	cat key.pem | base64
+
+install-tools:
+	@GOBIN=$(BIN_DIR) go install github.com/99designs/gqlgen@v0.17.19
+	@GOBIN=$(BIN_DIR) go install github.com/google/wire/cmd/wire@latest

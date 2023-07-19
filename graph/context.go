@@ -1,8 +1,8 @@
 package graph
 
 import (
-	"canvas-server/graph/dataloader"
-	"canvas-server/infra/firebase"
+	"canvas-asset-generator/graph/dataloader"
+	"canvas-asset-generator/infra/firebase"
 	"context"
 )
 

@@ -1,7 +1,7 @@
 package work
 
 import (
-	"canvas-server/infra/datastore"
+	"canvas-asset-generator/infra/datastore"
 	"context"
 
 	w "go.mercari.io/datastore"

@@ -1,7 +1,7 @@
 package graph
 
 import (
-	"canvas-server/graph/generated"
+	"canvas-asset-generator/graph/generated"
 	"net/http"
 
 	"github.com/99designs/gqlgen/graphql/handler"

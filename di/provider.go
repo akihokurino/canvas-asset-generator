@@ -4,17 +4,17 @@
 package di
 
 import (
-	"canvas-server/batch"
-	"canvas-server/graph"
-	"canvas-server/grpc"
-	"canvas-server/infra/cloud_storage"
-	"canvas-server/infra/datastore"
-	"canvas-server/infra/datastore/fcm_token"
-	"canvas-server/infra/datastore/frame"
-	"canvas-server/infra/datastore/work"
-	"canvas-server/infra/ffmpeg"
-	"canvas-server/infra/firebase"
-	"canvas-server/subscriber"
+	"canvas-asset-generator/batch"
+	"canvas-asset-generator/graph"
+	"canvas-asset-generator/grpc"
+	"canvas-asset-generator/infra/cloud_storage"
+	"canvas-asset-generator/infra/datastore"
+	"canvas-asset-generator/infra/datastore/fcm_token"
+	"canvas-asset-generator/infra/datastore/frame"
+	"canvas-asset-generator/infra/datastore/work"
+	"canvas-asset-generator/infra/ffmpeg"
+	"canvas-asset-generator/infra/firebase"
+	"canvas-asset-generator/subscriber"
 	"os"
 
 	"github.com/google/wire"
@@ -33,7 +33,6 @@ var providerSet = wire.NewSet(
 	subscriber.NewServer,
 	provideSubscriberAuthenticate,
 	batch.NewExportCSV,
-	batch.NewResizeFrame,
 	batch.NewServer,
 	graph.NewResolver,
 	graph.NewServer,

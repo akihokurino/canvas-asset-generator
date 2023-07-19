@@ -2,10 +2,10 @@ package batch
 
 import (
 	"bytes"
-	"canvas-server/config"
-	"canvas-server/infra/cloud_storage"
-	"canvas-server/infra/datastore/frame"
-	"canvas-server/infra/datastore/work"
+	"canvas-asset-generator/config"
+	"canvas-asset-generator/infra/cloud_storage"
+	"canvas-asset-generator/infra/datastore/frame"
+	"canvas-asset-generator/infra/datastore/work"
 	"encoding/csv"
 	"fmt"
 	"log"

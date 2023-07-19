@@ -1,4 +1,4 @@
-module canvas-server
+module canvas-asset-generator
 
 go 1.16
 

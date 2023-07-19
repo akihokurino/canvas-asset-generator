@@ -79,3 +79,4 @@ internal/proto/go
 grpc/web/node_modules
 key.p12
 key.pem
+bin

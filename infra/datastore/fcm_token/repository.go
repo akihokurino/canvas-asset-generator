@@ -1,7 +1,7 @@
 package fcm_token
 
 import (
-	"canvas-server/infra/datastore"
+	"canvas-asset-generator/infra/datastore"
 	"context"
 
 	"github.com/pkg/errors"

@@ -4,10 +4,10 @@ package graph
 // will be copied through when generating and any unknown code will be moved to the end.
 
 import (
-	"canvas-server/graph/generated"
-	"canvas-server/graph/model"
-	"canvas-server/infra/datastore"
-	"canvas-server/infra/datastore/fcm_token"
+	"canvas-asset-generator/graph/generated"
+	"canvas-asset-generator/graph/model"
+	"canvas-asset-generator/infra/datastore"
+	"canvas-asset-generator/infra/datastore/fcm_token"
 	"context"
 	"fmt"
 	"net/url"
@@ -196,9 +196,9 @@ type workResolver struct{ *Resolver }
 // !!! WARNING !!!
 // The code below was going to be deleted when updating resolvers. It has been copied here so you have
 // one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+//   - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//     it when you're done.
+//   - You have helper methods in this file. Move them out to keep these resolver files clean.
 func (r *frameResolver) OrgImageURL(ctx context.Context, obj *model.Frame) (string, error) {
 	panic(fmt.Errorf("not implemented: OrgImageURL - orgImageUrl"))
 }

@@ -1,11 +1,11 @@
 package grpc
 
 import (
-	pb "canvas-server/grpc/proto/go"
-	"canvas-server/infra/cloud_storage"
-	"canvas-server/infra/datastore"
-	"canvas-server/infra/datastore/fcm_token"
-	"canvas-server/infra/firebase"
+	pb "canvas-asset-generator/grpc/proto/go"
+	"canvas-asset-generator/infra/cloud_storage"
+	"canvas-asset-generator/infra/datastore"
+	"canvas-asset-generator/infra/datastore/fcm_token"
+	"canvas-asset-generator/infra/firebase"
 	"context"
 	"log"
 	"net/http"

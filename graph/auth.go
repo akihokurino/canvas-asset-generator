@@ -1,7 +1,7 @@
 package graph
 
 import (
-	"canvas-server/infra/firebase"
+	"canvas-asset-generator/infra/firebase"
 	"net/http"
 )
 

@@ -1,12 +1,12 @@
 package graph
 
 import (
-	"canvas-server/infra/cloud_storage"
-	"canvas-server/infra/datastore"
-	"canvas-server/infra/datastore/fcm_token"
-	"canvas-server/infra/datastore/frame"
-	"canvas-server/infra/datastore/work"
-	"canvas-server/infra/firebase"
+	"canvas-asset-generator/infra/cloud_storage"
+	"canvas-asset-generator/infra/datastore"
+	"canvas-asset-generator/infra/datastore/fcm_token"
+	"canvas-asset-generator/infra/datastore/frame"
+	"canvas-asset-generator/infra/datastore/work"
+	"canvas-asset-generator/infra/firebase"
 )
 
 // This file will not be regenerated automatically.

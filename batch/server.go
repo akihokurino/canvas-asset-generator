@@ -6,7 +6,7 @@ import (
 
 type Server func(mux *http.ServeMux)
 
-func NewServer(exportCSV ExportCSV, resizeFrame ResizeFrame) Server {
+func NewServer(exportCSV ExportCSV) Server {
 
 	noAuth := func(server http.Handler) http.Handler {
 		return applyMiddleware(server)
@@ -14,7 +14,6 @@ func NewServer(exportCSV ExportCSV, resizeFrame ResizeFrame) Server {
 
 	return func(mux *http.ServeMux) {
 		mux.Handle("/export", noAuth(http.HandlerFunc(exportCSV)))
-		mux.Handle("/resize", noAuth(http.HandlerFunc(resizeFrame)))
 	}
 }
 

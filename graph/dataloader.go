@@ -1,9 +1,9 @@
 package graph
 
 import (
-	"canvas-server/graph/dataloader"
-	"canvas-server/infra/datastore/frame"
-	"canvas-server/infra/datastore/work"
+	"canvas-asset-generator/graph/dataloader"
+	"canvas-asset-generator/infra/datastore/frame"
+	"canvas-asset-generator/infra/datastore/work"
 	"net/http"
 )
 

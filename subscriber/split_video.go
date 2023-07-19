@@ -3,14 +3,14 @@ package subscriber
 import (
 	"bufio"
 	"bytes"
-	"canvas-server/config"
-	"canvas-server/infra/cloud_storage"
-	"canvas-server/infra/datastore"
-	"canvas-server/infra/datastore/fcm_token"
-	"canvas-server/infra/datastore/frame"
-	"canvas-server/infra/datastore/work"
-	"canvas-server/infra/ffmpeg"
-	"canvas-server/infra/firebase"
+	"canvas-asset-generator/config"
+	"canvas-asset-generator/infra/cloud_storage"
+	"canvas-asset-generator/infra/datastore"
+	"canvas-asset-generator/infra/datastore/fcm_token"
+	"canvas-asset-generator/infra/datastore/frame"
+	"canvas-asset-generator/infra/datastore/work"
+	"canvas-asset-generator/infra/ffmpeg"
+	"canvas-asset-generator/infra/firebase"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -20,6 +20,7 @@ import (
 	"log"
 	"math"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -59,7 +60,7 @@ func NewSplitVideo(
 			return errors.WithStack(err)
 		}
 
-		file, err := ioutil.TempFile("", "video")
+		file, err := os.CreateTemp("", "video")
 		if err != nil {
 			return errors.WithStack(err)
 		}
@@ -110,9 +111,15 @@ func NewSplitVideo(
 				return errors.WithStack(err)
 			}
 
-			subImage := imgSource.(SubImager).SubImage(
-				image.Rect(0, 300, imgSource.Bounds().Dx(), imgSource.Bounds().Dy()-300),
-			)
+			// 正方形で切り取る
+			width := imgSource.Bounds().Dx()
+			height := imgSource.Bounds().Dy()
+			length := math.Min(float64(width), float64(height))
+			startX := (width - int(length)) / 2
+			startY := (height - int(length)) / 2
+			endX := startX + int(length)
+			endY := startY + int(length)
+			subImage := imgSource.(SubImager).SubImage(image.Rect(startX, startY, endX, endY))
 
 			rect := subImage.Bounds()
 			resizedImage := image.NewRGBA(image.Rect(0, 0, rect.Dx()/5, rect.Dy()/5))

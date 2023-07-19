@@ -1,7 +1,7 @@
 package dataloader
 
 import (
-	"canvas-server/infra/datastore/frame"
+	"canvas-asset-generator/infra/datastore/frame"
 	"context"
 
 	"github.com/graph-gophers/dataloader"
