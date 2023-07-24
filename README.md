@@ -18,7 +18,9 @@
 ## Related
 
 - https://github.com/akihokurino/canvas-ios
-- https://github.com/akihokurino/canvas-nft-server
+- https://github.com/akihokurino/canvas-nft-generator
+- https://github.com/akihokurino/canvas-web
+- https://github.com/akihokurino/lambda-opensea
 
 ## Architecture
 
